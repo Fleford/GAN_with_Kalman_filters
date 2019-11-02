@@ -151,15 +151,33 @@ for pp in range(0, maxIter):
     dm = np.array(df.mean(axis=1)) 
     dm = dm.reshape(dm.shape[0],1)   
     ddf=df-dm
-
     
-    Cmd_f = (np.dot(dmf,ddf.T))/(nr-1);  # The cros-covariance matrix
-    Cdd_f = (np.dot(ddf,ddf.T))/(nr-1);  # The auto covariance of predicted data
+    Cmd_f = (np.dot(dmf,ddf.T))/(nr-1)  # The cross-covariance matrix
+    Cdd_f = (np.dot(ddf,ddf.T))/(nr-1)  # The auto covariance of predicted data
+
+    print("dmf")
+    print(dmf)
+    print(dmf.shape)
+
+    print("ddf")
+    print(ddf)
+    print(ddf.shape)
+
+    print("Cmd_f")
+    print(Cmd_f)
+    print(Cmd_f.shape)
+
+    print("Cdd_f")
+    print(Cdd_f)
+    print(Cdd_f.shape)
 
     CD=np.eye(101) * 0.01
     R = linalg.cholesky(CD,lower=True) #Matriz triangular inferior
-    U = R.T   #Matriz R transposta
+    U = R.T   #Matriz R transpose
     p , w =np.linalg.eig(CD)
+
+    print("R")
+    print(R)
 
     aux = np.repeat(Z,nr,axis=1)
     mean = 0*(Z.T)
@@ -195,6 +213,9 @@ for pp in range(0, maxIter):
         plt.plot(tss[:, 0], tss[:, i], 'b')
         plt.plot(Z, 'r-')
         plt.savefig('tutorial2-ts' + str(pp)+ '.png')
+
+    # Remove when done
+    break
 
 
 
