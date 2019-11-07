@@ -30,6 +30,9 @@ maxIter = 4
 alpha = np.zeros(maxIter)
 for pp in range(maxIter):
     alpha[pp] = (2**(maxIter-pp))
+print("alpha")
+print(alpha)
+print(alpha.shape)
    
 Z = np.loadtxt('Z.txt')
 Z=Z.reshape(Z.shape[0],1)
@@ -137,11 +140,22 @@ for pp in range(0, maxIter):
             raise Exception('MODFLOW did not terminate normally.')
         headobj = bf.HeadFile(modelname+'.hds')
         ts = headobj.get_ts(idx)
+        # print("ts")
+        # print(ts)
+        # print(ts.shape)
         tss[:,0] = ts[:,0]
         tss[:,i+1] = ts[:,1]
 
     yf=k_array.reshape(nr, 2500)
     yf=yf.transpose()
+
+    print("k_array")
+    print(k_array)
+    print(k_array.shape)
+
+    print("yf")
+    print(yf)
+    print(yf.shape)
 
     ym = np.array(yf.mean(axis=1))    # Mean of the y_f
     ym=ym.reshape(ym.shape[0],1)    
@@ -174,31 +188,61 @@ for pp in range(0, maxIter):
     CD=np.eye(101) * 0.01
     R = linalg.cholesky(CD,lower=True) #Matriz triangular inferior
     U = R.T   #Matriz R transpose
-    p , w =np.linalg.eig(CD)
+    # p, w = np.linalg.eig(CD)
 
     print("R")
     print(R)
+    print(R.shape)
+
+    print("U")
+    print(U)
+    print(U.shape)
+
+    # print("p")
+    # print(p)
+    # print(p.shape)
+    #
+    # print("w")
+    # print(w)
+    # print(w.shape)
 
     aux = np.repeat(Z,nr,axis=1)
     mean = 0*(Z.T)
     noise=np.random.multivariate_normal(mean[0], np.eye(len(Z)), nr).T
+
+    print("aux")
+    print(aux)
+    print(aux.shape)
+
+    print("mean")
+    print(mean)
+    print(mean.shape)
+
+    print("noise")
+    print(noise)
+    print(noise.shape)
 
     d_obs = aux+math.sqrt(alpha[pp])*np.dot(U,noise)  
 
      # Analysis step
     varn=1-1/math.pow(10,2)
 
-    u, s, vh = linalg.svd(Cdd_f+alpha[pp]*CD); v = vh.T
+    u, s, vh = linalg.svd(Cdd_f+alpha[pp]*CD)
+    v = vh.T
     diagonal = s
     for i in range(len(diagonal)):
         if (sum(diagonal[0:i+1]))/(sum(diagonal)) > varn:
             diagonal = diagonal[0:i+1]
             break
-    
+
+        print("i in loop")
+        print(i)
+    print("i ouy loop")
+    print(i)
     u=u[:,0:i+1]
     v=v[:,0:i+1]
     ess = np.diag(diagonal**(-1))
-    K=np.dot(Cmd_f,(np.dot(np.dot(v,ess),(u.T))))
+    K=np.dot(Cmd_f,(np.dot(np.dot(v,ess),(u.T))))   # K = [Cmd_f][v][ess][u.T]
 
     ya = yf + (np.dot(K,(d_obs-df)))
     ya = ya.transpose()
@@ -215,7 +259,7 @@ for pp in range(0, maxIter):
         plt.savefig('tutorial2-ts' + str(pp)+ '.png')
 
     # Remove when done
-    break
+    # break
 
 
 
