@@ -33,7 +33,8 @@ for pp in range(maxIter):
 print("alpha")
 print(alpha)
 print(alpha.shape)
-   
+
+# Z is the observed heads through time
 Z = np.loadtxt('Z.txt')
 Z=Z.reshape(Z.shape[0],1)
 
@@ -64,7 +65,7 @@ def GSLIB2ndarray(data_file,kcol,nz,nx,ny):
     return array_k,col_name
 
 
-k_array,m=GSLIB2ndarray('sgsim.out',0,nr,ncol,nrow)
+k_array, m=GSLIB2ndarray('sgsim.out',0,nr,ncol,nrow)
 
 
 # Variables for the BAS package
@@ -132,20 +133,21 @@ idx = (0, int(nrow/2) - 1, int(ncol/2) - 1)
 for pp in range(0, maxIter):
       
     for i in range(0,nr):   
-        print (i)
-        lpf = flopy.modflow.ModflowLpf(mf, hk=np.exp(k_array[i,:,:]), vka=vka, sy=sy, ss=ss, laytyp=laytyp,ipakcb=53)
+        print("Running MODFLOW for k realization " + str(i))
+        lpf = flopy.modflow.ModflowLpf(mf, hk=np.exp(k_array[i,:,:]), vka=vka, sy=sy, ss=ss, laytyp=laytyp, ipakcb=53)
         mf.write_input()                               
         success, mfoutput = mf.run_model(silent=False, pause=False)
         if not success:
             raise Exception('MODFLOW did not terminate normally.')
         headobj = bf.HeadFile(modelname+'.hds')
-        ts = headobj.get_ts(idx)
+        ts = headobj.get_ts(idx)    # Extract transient heads
         # print("ts")
         # print(ts)
         # print(ts.shape)
         tss[:,0] = ts[:,0]
         tss[:,i+1] = ts[:,1]
 
+    # Convert k realizations into a 2d matrix with each column representing a realization
     yf=k_array.reshape(nr, 2500)
     yf=yf.transpose()
 
@@ -157,25 +159,32 @@ for pp in range(0, maxIter):
     print(yf)
     print(yf.shape)
 
-    ym = np.array(yf.mean(axis=1))    # Mean of the y_f
+    # Calculate the mean k value for a given location in the domain
+    ym = np.array(yf.mean(axis=1))    # Mean of the y_f (the k_array)
     ym=ym.reshape(ym.shape[0],1)    
     dmf=yf-ym
 
-    df=tss[:,1:]
+    # The simulated drawdown heads using k_array
+    # Each column is realization
+    df=tss[:, 1:]
     dm = np.array(df.mean(axis=1)) 
-    dm = dm.reshape(dm.shape[0],1)   
-    ddf=df-dm
-    
-    Cmd_f = (np.dot(dmf,ddf.T))/(nr-1)  # The cross-covariance matrix
-    Cdd_f = (np.dot(ddf,ddf.T))/(nr-1)  # The auto covariance of predicted data
+    dm = dm.reshape(dm.shape[0], 1)
+    ddf = df-dm
 
-    print("dmf")
-    print(dmf)
-    print(dmf.shape)
+    print("df")
+    print(df)
+    print(df.shape)
 
     print("ddf")
     print(ddf)
     print(ddf.shape)
+    
+    Cmd_f = (np.dot(dmf, ddf.T))/(nr-1)  # The cross-covariance matrix between the k values and the field
+    Cdd_f = (np.dot(ddf, ddf.T))/(nr-1)  # The auto covariance of predicted data (transient heads of k realizations)
+
+    print("dmf")
+    print(dmf)
+    print(dmf.shape)
 
     print("Cmd_f")
     print(Cmd_f)
@@ -185,7 +194,7 @@ for pp in range(0, maxIter):
     print(Cdd_f)
     print(Cdd_f.shape)
 
-    CD=np.eye(101) * 0.01
+    CD = np.eye(101) * 0.01
     R = linalg.cholesky(CD,lower=True) #Matriz triangular inferior
     U = R.T   #Matriz R transpose
     # p, w = np.linalg.eig(CD)
@@ -194,7 +203,7 @@ for pp in range(0, maxIter):
     print(R)
     print(R.shape)
 
-    print("U")
+    print("U")  # Only the U variable is used, U = CD = Identity matrix times 0.01
     print(U)
     print(U.shape)
 
@@ -206,9 +215,17 @@ for pp in range(0, maxIter):
     # print(w)
     # print(w.shape)
 
-    aux = np.repeat(Z,nr,axis=1)
-    mean = 0*(Z.T)
-    noise=np.random.multivariate_normal(mean[0], np.eye(len(Z)), nr).T
+    # Z is the observed heads through time (just a single vector)
+    print("Z")
+    print(Z)
+    print(Z.shape)
+
+    # Convert Z(true transient heads) into the same dimension as ddf(realization transient heads)
+    aux = np.repeat(Z, nr, axis=1)
+
+    # Create a noise matrix with same dimensions as ddf(realization transient heads)
+    mean = 0 * (Z.T)
+    noise = np.random.multivariate_normal(mean[0], np.eye(len(Z)), nr).T
 
     print("aux")
     print(aux)
@@ -222,29 +239,56 @@ for pp in range(0, maxIter):
     print(noise)
     print(noise.shape)
 
-    d_obs = aux+math.sqrt(alpha[pp])*np.dot(U,noise)  
+    # Create a noisy version of aux(Z(true transient heads) with the dimensions of ddf(realization transient heads))
+    # The noise is scaled with math.sqrt(alpha[pp]) * (identity_matrix * 0.01)
+    d_obs = aux+math.sqrt(alpha[pp])*np.dot(U, noise)
 
-     # Analysis step
-    varn=1-1/math.pow(10,2)
+    print("d_obs")
+    print(d_obs)
+    print(d_obs.shape)
+
+    # Analysis step
+    # varn = 0.99
+    varn=1-1/math.pow(10, 2)
+
+    # Reminder: Cdd_f is the auto covariance of predicted data (transient heads of k realizations)
 
     u, s, vh = linalg.svd(Cdd_f+alpha[pp]*CD)
     v = vh.T
     diagonal = s
     for i in range(len(diagonal)):
+        # Only eigen vectors the contribute to 99% of solution
         if (sum(diagonal[0:i+1]))/(sum(diagonal)) > varn:
             diagonal = diagonal[0:i+1]
             break
 
         print("i in loop")
         print(i)
-    print("i ouy loop")
+    print("i out loop")
     print(i)
     u=u[:,0:i+1]
     v=v[:,0:i+1]
     ess = np.diag(diagonal**(-1))
-    K=np.dot(Cmd_f,(np.dot(np.dot(v,ess),(u.T))))   # K = [Cmd_f][v][ess][u.T]
+    K=np.dot(Cmd_f,(np.dot(np.dot(v, ess), (u.T))))   # K = [Cmd_f][v][ess][u.T]
 
-    ya = yf + (np.dot(K,(d_obs-df)))
+    print("u")
+    print(u)
+    print(u.shape)
+
+    print("v")
+    print(v)
+    print(v.shape)
+
+    print("ess")
+    print(ess)
+    print(ess.shape)
+
+    print("K")
+    print(K)
+    print(K.shape)
+
+    # Reminder: yf is the 2d matrix of k realizations
+    ya = yf + (np.dot(K, (d_obs - df))) # ya = yf + [K]([d_obs - ])
     ya = ya.transpose()
     k_array=ya.reshape(nr, ncol, nrow)
    
@@ -259,7 +303,7 @@ for pp in range(0, maxIter):
         plt.savefig('tutorial2-ts' + str(pp)+ '.png')
 
     # Remove when done
-    # break
+    break
 
 
 
