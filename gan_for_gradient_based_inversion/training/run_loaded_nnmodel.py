@@ -31,7 +31,6 @@ netG = netG(nc, nz, ngf, gfs, ngpu)
 netG.load_state_dict(torch.load('%s/netG_epoch_%d.pth' % (outf, epoch)))
 netG.to(device)
 netG.eval()
-# netG.to(device)
 print(netG)
 print()
 
