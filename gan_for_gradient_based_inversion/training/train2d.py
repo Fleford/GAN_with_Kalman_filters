@@ -155,8 +155,13 @@ for epoch in range(opt.nepoch):
         output = netD(real_cpu)
         label = torch.full_like(output, real_label, device=device) #forcing label to match output count
         print("look here")
+        print("data.shape")
+        print(data.shape)
+        print("real_cpu.shape")
         print(real_cpu.shape)
+        print("output.shape")
         print(output.shape)
+        print("label.shape")
         print(label.shape)
         errD_real = criterion(output, label)
         errD_real.backward()
@@ -179,7 +184,7 @@ for epoch in range(opt.nepoch):
         errD = errD_real + errD_fake
         optimizerD.step()
 
-        ############################
+         ############################
         # (2) Update G network: maximize log(D(G(z)))
         ###########################
         netG.zero_grad()
