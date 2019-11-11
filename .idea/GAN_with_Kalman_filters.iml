@@ -4,8 +4,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/gan_for_gradient_based_inversion" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/gan_for_gradient_based_inversion/inversion" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/gan_for_gradient_based_inversion/training" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Python-Ex" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

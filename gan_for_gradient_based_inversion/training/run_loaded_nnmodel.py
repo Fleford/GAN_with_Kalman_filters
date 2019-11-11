@@ -4,6 +4,8 @@ import numpy as np
 
 from nnmodels import netG
 
+import matplotlib.pyplot as plt
+
 """
 Here's some code to practice loading and using trained GAN models
 """
@@ -15,16 +17,17 @@ device = torch.device("cpu")
 nc = 1  # 'number of channeles in original image space'
 nz = 1  # 'number of non-spatial dimensions in latent space z'
 ngf = 64    # 'initial number of filters for dis'
-gfs = 10    # 'kernel size for gen'
+gfs = 5    # 'kernel size for gen'
 ngpu = 1    # 'number of GPUs to use'
 
+# Input batch parameters
 batch_size = 1
-zx = 3
-zy = 3
+zx = 4
+zy = 4
 
 # File directory
 outf = './train_data'
-epoch = 0
+epoch = 5
 
 # Load model
 netG = netG(nc, nz, ngf, gfs, ngpu)
@@ -54,9 +57,13 @@ print()
 
 numpy_output = output.numpy()
 numpy_output = numpy_output.squeeze()
+np.savetxt("k_array_ref_gan.txt", numpy_output)
 print("numpy_output:")
 print(numpy_output)
 print(numpy_output.shape)
+plt.matshow(numpy_output)
+plt.savefig('k_array_ref_gan.png')
+plt.show()
 
 
 
