@@ -30,13 +30,13 @@ ss = 1.e-4
 laytyp = 1
 
 # Number of realizations (also batch size)
-nr = 100
+nr = 10
 
 # Dimension of latent vector
 zx = 4
 zy = 4
 
-maxIter = 11
+maxIter = 19
 alpha = np.zeros(maxIter)
 for pp in range(maxIter):
     alpha[pp] = (2**(maxIter-pp))
@@ -137,6 +137,7 @@ for pp in range(0, maxIter):
     k_array = netG(latent_k_array).squeeze().numpy()
 
     # Plot first k array
+    plt.close('all')
     plt.matshow(k_array[0])
     plt.savefig('tutorial2-k' + str(pp) + '.png')
     # plt.show()
@@ -311,9 +312,10 @@ for pp in range(0, maxIter):
 
     # print("5 Second PAUSE!")
     # time.sleep(5)
-   
+
+    plt.close('all')
     plt.figure(pp)
-    ttl = 'figure 11'.format(idx[0] + 1, idx[1] + 1, idx[2] + 1)
+    ttl = 'head versus time'.format(idx[0] + 1, idx[1] + 1, idx[2] + 1)
     plt.title(ttl)
     plt.xlabel('time')
     plt.ylabel('head')
