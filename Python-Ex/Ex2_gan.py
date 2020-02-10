@@ -2,7 +2,6 @@ import numpy as np
 import flopy
 import math
 import matplotlib.pyplot as plt
-#import pandas as pd
 from scipy import array, linalg, dot
 
 import time
@@ -30,13 +29,13 @@ ss = 1.e-4
 laytyp = 1
 
 # Number of realizations (also batch size)
-nr = 10
+nr = 1000
 
 # Dimension of latent vector
 zx = 4
 zy = 4
 
-maxIter = 19
+maxIter = 100
 alpha = np.zeros(maxIter)
 for pp in range(maxIter):
     alpha[pp] = (2**(maxIter-pp))
@@ -72,6 +71,15 @@ print(k_array.shape)
 plt.matshow(k_array[0])
 plt.show()
 
+
+# REMOVE
+average = np.average(k_array, axis=0)
+plt.matshow(average)
+plt.savefig('k_avg100_2.png')
+plt.show()
+
+breakpoint()
+
 # Variables for the BAS package
 # Note that changes from the previous tutorial!
 ibound = np.ones((nlay, nrow, ncol), dtype=np.int32)
@@ -82,7 +90,6 @@ nper = 2
 perlen = [1, 100]
 nstp = [1, 100]
 steady = [True, False]
-
 
 # Flopy objects
 modelname = 'tutorial2'
@@ -207,7 +214,8 @@ for pp in range(0, maxIter):
     print(Cdd_f)
     print(Cdd_f.shape)
 
-    CD = np.eye(101) * 0.01
+    # CD = np.eye(101) * 0.01
+    CD = np.eye(101) * 10
     R = linalg.cholesky(CD, lower=True)     # Matriz triangular inferior
     U = R.T  # Matriz R transpose
     # p, w = np.linalg.eig(CD)
@@ -254,7 +262,8 @@ for pp in range(0, maxIter):
 
     # Create a noisy version of aux(Z(true transient heads) with the dimensions of ddf(realization transient heads))
     # The noise is scaled with math.sqrt(alpha[pp]) * (identity_matrix * 0.01)
-    d_obs = aux+math.sqrt(alpha[pp])*np.dot(U, noise)
+    # d_obs = aux+math.sqrt(alpha[pp])*np.dot(U, noise)
+    d_obs = aux + np.dot(U, noise)
 
     print("d_obs")
     print(d_obs)
@@ -266,7 +275,8 @@ for pp in range(0, maxIter):
 
     # Reminder: Cdd_f is the auto covariance of predicted data (transient heads of k realizations)
 
-    u, s, vh = linalg.svd(Cdd_f+alpha[pp]*CD)
+    # u, s, vh = linalg.svd(Cdd_f+alpha[pp]*CD)
+    u, s, vh = linalg.svd(Cdd_f + CD)
     v = vh.T
     diagonal = s
     for i in range(len(diagonal)):

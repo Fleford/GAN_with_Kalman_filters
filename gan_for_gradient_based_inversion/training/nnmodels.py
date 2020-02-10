@@ -4,7 +4,7 @@ Created on Thu Aug 30 11:54:17 2018
 
 @author: elaloy
 """
-
+import torch
 import torch.nn as nn
 
 class netD(nn.Module):
@@ -169,3 +169,68 @@ class netG(nn.Module):
 #        else:
 #            output = self.main(input)
 #        return output
+
+
+# Below are Fleford's networks
+
+# (Z, X, Y) in, (Y, Z) out
+class netG_transformer(nn.Module):
+    def __init__(self, nc=2, nz=2, ngf=64, gfs=5, ngpu=1):
+        super(netG_transformer, self).__init__()
+        self.ngpu = ngpu
+
+        self.main = nn.Sequential(
+
+            nn.ConvTranspose2d(nc, 16, 5, 1, 2, bias=False),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(16, 32, 5, 1, 2, bias=False),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(32, 16, 5, 1, 2, bias=False),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(16, 1, 5, 1, 2, bias=False),
+            nn.ReLU(True),
+
+            nn.Tanh()
+        )
+
+    def forward(self, input, condition):
+        input_to_G = torch.cat((input, condition), 1)
+        if input_to_G.is_cuda and self.ngpu > 1:
+            output_from_G = nn.parallel.data_parallel(self.main, input_to_G,
+                                               range(self.ngpu))
+        else:
+            output_from_G = self.main(input_to_G)
+
+        output = output_from_G - (condition * output_from_G) + (condition * input)
+        return output
+
+
+# For testing purposes only
+if __name__ == "__main__":
+    device = "cpu"
+    # input_noise = torch.rand(batch_size, nz, zx, zy, device=device) * 2 - 1
+    k_matrix = torch.rand(3, 1, 5, 5, device=device) * 2 - 1
+    condition_matrix = torch.randint_like(k_matrix, 2) * torch.randint_like(k_matrix, 2)\
+                       * torch.randint_like(k_matrix, 2)
+    inverse_condition_matrix = torch.ones_like(condition_matrix) - condition_matrix
+    input_matrix = torch.cat((k_matrix, condition_matrix), 1)
+    print("input_matrix")
+    print(input_matrix)
+    print(input_matrix.shape)
+    print("k_matrix")
+    print(k_matrix)
+    print(k_matrix.shape)
+    print("condition_matrix")
+    print(condition_matrix)
+    print(condition_matrix.shape)
+    netG_transformer_1 = netG_transformer()
+    output = netG_transformer_1(k_matrix, condition_matrix)
+    print("netG_transformer_1")
+    print(netG_transformer_1)
+    print("output")
+    print(output)
+    print(output.shape)
+

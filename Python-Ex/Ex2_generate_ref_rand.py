@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from scipy import array, linalg, dot
 
 import flopy.utils.binaryfile as bf
+
+# The following generates a random Z vector and generates a K realization
+# It then runs the gw model with this realization to get the corresponding timeseries data
+
 # Model domain and grid definition
 Lx = 1000.
 Ly = 1000.
