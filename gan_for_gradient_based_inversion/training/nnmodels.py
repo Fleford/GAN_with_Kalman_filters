@@ -181,17 +181,36 @@ class netG_transformer(nn.Module):
 
         self.main = nn.Sequential(
 
-            nn.ConvTranspose2d(nc, 16, 5, 1, 2, bias=False),
+            nn.ConvTranspose2d(2, 2**9, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**9),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(16, 32, 5, 1, 2, bias=False),
+            nn.ConvTranspose2d(2 ** 9, 2 ** 8, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**8),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(32, 16, 5, 1, 2, bias=False),
+            nn.ConvTranspose2d(2 ** 8, 2 ** 7, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**7),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(16, 1, 5, 1, 2, bias=False),
+            nn.ConvTranspose2d(2 ** 7, 2 ** 6, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**6),
             nn.ReLU(True),
+
+            nn.ConvTranspose2d(2 ** 6, 2 ** 5, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**5),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(2 ** 5, 1, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(1),
+            nn.ReLU(True),
+
+            ### Start dilations ###
+            nn.ConvTranspose2d(1, 2**9, 5, 1, 6, output_padding=0, bias=False, dilation=3),
+            nn.BatchNorm2d(2**9),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(2**9, 1, 5, 1, 10, output_padding=0, bias=False, dilation=5),
 
             nn.Tanh()
         )
