@@ -88,7 +88,8 @@ class netG(nn.Module):
 
         self.main = nn.Sequential(
 
-                nn.ConvTranspose2d(     nz, ngf * 8, gfs, 2, gfs//2, bias=False), 
+                nn.ConvTranspose2d(     nz, ngf * 8, gfs, 2, 2, bias=False),
+                # nn.ConvTranspose2d(nz, ngf * 8, gfs, 2,  gfs//2, bias=False),
                 nn.ReLU(True),
                 nn.InstanceNorm2d(ngf * 8),
 
@@ -231,25 +232,28 @@ class netG_transformer(nn.Module):
 if __name__ == "__main__":
     device = "cpu"
     # input_noise = torch.rand(batch_size, nz, zx, zy, device=device) * 2 - 1
-    k_matrix = torch.rand(3, 1, 5, 5, device=device) * 2 - 1
+    k_matrix = torch.rand(3, 1, 8, 8, device=device) * 2 - 1
     condition_matrix = torch.randint_like(k_matrix, 2) * torch.randint_like(k_matrix, 2)\
                        * torch.randint_like(k_matrix, 2)
     inverse_condition_matrix = torch.ones_like(condition_matrix) - condition_matrix
     input_matrix = torch.cat((k_matrix, condition_matrix), 1)
-    print("input_matrix")
-    print(input_matrix)
-    print(input_matrix.shape)
+    # print("input_matrix")
+    # print(input_matrix)
+    # print(input_matrix.shape)
     print("k_matrix")
-    print(k_matrix)
+    # print(k_matrix)
     print(k_matrix.shape)
-    print("condition_matrix")
-    print(condition_matrix)
-    print(condition_matrix.shape)
-    netG_transformer_1 = netG_transformer()
-    output = netG_transformer_1(k_matrix, condition_matrix)
-    print("netG_transformer_1")
-    print(netG_transformer_1)
+    # print("condition_matrix")
+    # print(condition_matrix)
+    # print(condition_matrix.shape)
+    # netG_transformer_1 = netG_transformer()
+    # output = netG_transformer_1(k_matrix, condition_matrix)
+    # print("netG_transformer_1")
+    # print(netG_transformer_1)
+    netG = netG(1, 1, 64, 5, 1)
+    print(netG)
+    output = netG(k_matrix)
     print("output")
-    print(output)
+    # print(output)
     print(output.shape)
 

@@ -23,20 +23,20 @@ import numpy as np
 from utils import get_texture2D_iter, zx_to_npx
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--batchSize', type=int, default=32, help='input batch size')
+parser.add_argument('--batchSize', type=int, default=16, help='input batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the input image to network')
 parser.add_argument('--nz', type=int, default=1, help='number of non-spatial dimensions in latent space z')
-parser.add_argument('--zx', type=int, default=12, help='number of grid elements in x-spatial dimension of z')
-parser.add_argument('--zy', type=int, default=12, help='number of grid elements in y-patial dimension of z')
-parser.add_argument('--zx_sample', type=int, default=20, help='zx for saved image snapshots from G')
-parser.add_argument('--zy_sample', type=int, default=20, help='zy for saved image snapshots from G')
+parser.add_argument('--zx', type=int, default=6, help='number of grid elements in x-spatial dimension of z')
+parser.add_argument('--zy', type=int, default=6, help='number of grid elements in y-patial dimension of z')
+parser.add_argument('--zx_sample', type=int, default=6, help='zx for saved image snapshots from G')
+parser.add_argument('--zy_sample', type=int, default=6, help='zy for saved image snapshots from G')
 parser.add_argument('--nc', type=int, default=1, help='number of channeles in original image space')
 parser.add_argument('--ngf', type=int, default=64, help='initial number of filters for dis')
 parser.add_argument('--ndf', type=int, default=64, help='initial number of filters for gen')
 parser.add_argument('--dfs', type=int, default=5, help='kernel size for dis')
 parser.add_argument('--gfs', type=int, default=5, help='kernel size for gen')
-parser.add_argument('--nepoch', type=int, default=10, help='number of epochs to train for')
-parser.add_argument('--niter', type=int, default=200, help='number of iterations per training epoch')
+parser.add_argument('--nepoch', type=int, default=100, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=100, help='number of iterations per training epoch')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--l2_fac', type=float, default=1e-7, help='factor for l2 regularization of the weights in G and D')
@@ -81,12 +81,12 @@ dfs = int(opt.dfs)
 gfs = int(opt.gfs)
 nc = int(opt.nc)
 zx = int(opt.zx)
-zy= int(opt.zy)
+zy = int(opt.zy)
 zx_sample = int(opt.zx_sample)
 zy_sample = int(opt.zy_sample)
-depth=5
-npx=zx_to_npx(zx,depth)
-npy=zx_to_npx(zy,depth)
+depth = 5
+npx=zx_to_npx(zx, depth)
+npy=zx_to_npx(zy, depth)
 batch_size = int(opt.batchSize)
 
 print(npx,npy)
@@ -94,7 +94,8 @@ print(npx,npy)
 if opt.data_iter=='from_ti':
     # texture_dir='D:/gan_for_gradient_based_inv/training/ti/'
     texture_dir = 'C:/Users/Fleford/PycharmProjects/gan_for_gradient_based_inv/training/ti/'
-    data_iter   = get_texture2D_iter(texture_dir, npx=npx, npy=npy,mirror=False, batch_size=batch_size,n_channel=nc)
+    data_iter   = get_texture2D_iter(texture_dir, npx=npx, npy=npy ,mirror=False, batch_size=batch_size,n_channel=nc)
+
 
 # custom weights initialization called on netG and netD
 def weights_init(m):
@@ -121,11 +122,19 @@ print(netD)
 criterion = nn.BCELoss()
 
 # Optimizers
-optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999),weight_decay=opt.l2_fac)
-optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999),weight_decay=opt.l2_fac)
+optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999), weight_decay=opt.l2_fac)
+optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999), weight_decay=opt.l2_fac)
 
-input_noise = torch.rand(batch_size, nz, zx, zy, device=device)*2-1
-fixed_noise = torch.rand(1, nz, zx_sample, zy_sample, device=device)*2-1
+# Set distribution
+uniform = False
+
+if uniform:
+    input_noise = torch.rand(batch_size, nz, zx, zy, device=device)*2-1
+    fixed_noise = torch.rand(1, nz, zx_sample, zy_sample, device=device)*2-1
+else:
+    input_noise = torch.randn(batch_size, nz, zx, zy, device=device)
+    fixed_noise = torch.randn(1, nz, zx_sample, zy_sample, device=device)
+
 real_label = 1
 fake_label = 0
 
@@ -154,22 +163,32 @@ for epoch in range(opt.nepoch):
         # label = torch.full((batch_size*zx*zy,), real_label, device=device)
         output = netD(real_cpu)
         label = torch.full_like(output, real_label, device=device) #forcing label to match output count
-        print("look here")
-        print("data.shape")
-        print(data.shape)
-        print("real_cpu.shape")
-        print(real_cpu.shape)
-        print("output.shape")
-        print(output.shape)
-        print("label.shape")
-        print(label.shape)
+        # print("look here")
+        # print("data.shape")
+        # print(data.shape)
+        # print("real_cpu.shape")
+        # print(real_cpu.shape)
+        # print("output.shape")
+        # print(output.shape)
+        # print("label.shape")
+        # print(label.shape)
         errD_real = criterion(output, label)
         errD_real.backward()
         D_x = output.mean().item()
 
         # train with fake
-        noise = torch.rand(batch_size, nz, zx, zy, device=device)*2-1
+        if uniform:
+            noise = torch.rand(batch_size, nz, zx, zy, device=device)*2-1
+        else:
+            noise = torch.randn(batch_size, nz, zx, zy, device=device)
+
         fake = netG(noise)
+        # print("look here")
+        # print("noise.shape")
+        # print(noise.shape)
+        # print("fake.shape")
+        # print(fake.shape)
+        # breakpoint()
         
         # label.fill_(fake_label)
         output = netD(fake.detach())

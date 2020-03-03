@@ -9,6 +9,7 @@ for x in range(8):
     random_matrix = random_matrix * np.random.randint(2, size=k_array.shape)
 print(random_matrix)
 print(random_matrix.shape)
+
 # Display matrix
-plt.matshow(random_matrix)
+plt.matshow(k_array*random_matrix)
 plt.show()
