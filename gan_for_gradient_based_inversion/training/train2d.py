@@ -21,15 +21,16 @@ from nnmodels import netD
 from nnmodels import netG
 import numpy as np
 from utils import get_texture2D_iter, zx_to_npx
+side_length = 1
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--batchSize', type=int, default=16, help='input batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the input image to network')
 parser.add_argument('--nz', type=int, default=1, help='number of non-spatial dimensions in latent space z')
-parser.add_argument('--zx', type=int, default=6, help='number of grid elements in x-spatial dimension of z')
-parser.add_argument('--zy', type=int, default=6, help='number of grid elements in y-patial dimension of z')
-parser.add_argument('--zx_sample', type=int, default=6, help='zx for saved image snapshots from G')
-parser.add_argument('--zy_sample', type=int, default=6, help='zy for saved image snapshots from G')
+parser.add_argument('--zx', type=int, default=side_length, help='number of grid elements in x-spatial dimension of z')
+parser.add_argument('--zy', type=int, default=side_length, help='number of grid elements in y-patial dimension of z')
+parser.add_argument('--zx_sample', type=int, default=side_length, help='zx for saved image snapshots from G')
+parser.add_argument('--zy_sample', type=int, default=side_length, help='zy for saved image snapshots from G')
 parser.add_argument('--nc', type=int, default=1, help='number of channeles in original image space')
 parser.add_argument('--ngf', type=int, default=64, help='initial number of filters for dis')
 parser.add_argument('--ndf', type=int, default=64, help='initial number of filters for gen')
@@ -37,7 +38,7 @@ parser.add_argument('--dfs', type=int, default=5, help='kernel size for dis')
 parser.add_argument('--gfs', type=int, default=5, help='kernel size for gen')
 parser.add_argument('--nepoch', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--niter', type=int, default=100, help='number of iterations per training epoch')
-parser.add_argument('--lr', type=float, default=0.001, help='learning rate, default=0.0002')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002') #0.001
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--l2_fac', type=float, default=1e-7, help='factor for l2 regularization of the weights in G and D')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')

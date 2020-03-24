@@ -23,6 +23,7 @@ from nnmodels import netG_transformer
 import numpy as np
 from utils import get_texture2D_iter, zx_to_npx
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--batchSize', type=int, default=16, help='input batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the input image to network')
@@ -139,7 +140,7 @@ def generate_condition(input_matrix):
     output_matrix = ref_k_array * random_matrix
 
     # output_matrix = torch.zeros_like(input_matrix)
-    return output_matrix
+    return output_matrix.cuda()
 
 
 # input_noise = torch.rand(batch_size, nz, zx, zy, device=device)*2-1

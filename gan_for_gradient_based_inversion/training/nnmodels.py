@@ -88,7 +88,13 @@ class netG(nn.Module):
 
         self.main = nn.Sequential(
 
-                nn.ConvTranspose2d(     nz, ngf * 8, gfs, 2, 2, bias=False),
+                nn.ConvTranspose2d(     nz, ngf * 8, gfs, 2, 1, bias=False),
+                # nn.ConvTranspose2d(nz, ngf * 8, gfs, 2,  gfs//2, bias=False),
+                nn.ReLU(True),
+                nn.InstanceNorm2d(ngf * 8),
+
+                # Remove later
+                nn.ConvTranspose2d(ngf * 8, ngf * 8, gfs, 2, 1, bias=False),
                 # nn.ConvTranspose2d(nz, ngf * 8, gfs, 2,  gfs//2, bias=False),
                 nn.ReLU(True),
                 nn.InstanceNorm2d(ngf * 8),
@@ -217,6 +223,7 @@ class netG_transformer(nn.Module):
         )
 
     def forward(self, input, condition):
+        condition = torch.ones_like(input) * condition
         input_to_G = torch.cat((input, condition), 1)
         if input_to_G.is_cuda and self.ngpu > 1:
             output_from_G = nn.parallel.data_parallel(self.main, input_to_G,
