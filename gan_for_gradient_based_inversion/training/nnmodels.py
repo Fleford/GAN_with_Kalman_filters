@@ -6,6 +6,7 @@ Created on Thu Aug 30 11:54:17 2018
 """
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
 class netD(nn.Module):
     def __init__(self, nc = 1, ndf = 64, dfs = 9, ngpu = 1):
@@ -231,7 +232,8 @@ class netG_transformer(nn.Module):
         else:
             output_from_G = self.main(input_to_G)
 
-        output = output_from_G - (condition * output_from_G) + (condition * input)
+        output = output_from_G - (abs(condition) * output_from_G) + condition
+
         return output
 
 

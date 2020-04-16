@@ -48,6 +48,7 @@ def generate_condition(input_matrix):
     for x in range(8):
         random_matrix = random_matrix * torch.randint_like(ref_k_array, 2)
     output_matrix = ref_k_array * random_matrix
+    plt.matshow(output_matrix)
 
     # output_matrix = torch.zeros_like(input_matrix)
     return output_matrix.cuda()
@@ -80,9 +81,11 @@ print("numpy_output:")
 print(numpy_output)
 print(numpy_output.shape)
 plt.matshow(numpy_output)
+# plt.show()
+
+ref_k_array = np.loadtxt("k_array_ref_gan.txt")
+plt.matshow(ref_k_array)
 plt.show()
-
-
 
 
 
