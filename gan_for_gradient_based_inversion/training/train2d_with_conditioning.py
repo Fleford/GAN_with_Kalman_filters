@@ -22,6 +22,7 @@ from nnmodels import netG
 from nnmodels import netG_transformer
 import numpy as np
 from utils import get_texture2D_iter, zx_to_npx
+from shutil import copyfile
 
 
 parser = argparse.ArgumentParser()
@@ -248,3 +249,9 @@ for epoch in range(opt.nepoch):
     torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
     torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
 
+# Save training code to results folder
+print()
+print("Saving train2d_with_conditioning.py")
+src = "train2d_with_conditioning.py"
+dst = "train_data/train2d_with_conditioning"
+copyfile(src, dst)
