@@ -30,6 +30,7 @@ npy = zy
 # File directory
 outf = './train_data'
 epoch = 22
+#22
 
 # Load model
 # netG = netG(nc, nz, ngf, gfs, ngpu)
