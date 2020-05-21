@@ -38,7 +38,7 @@ parser.add_argument('--ngf', type=int, default=64, help='initial number of filte
 parser.add_argument('--ndf', type=int, default=64, help='initial number of filters for gen')
 parser.add_argument('--dfs', type=int, default=5, help='kernel size for dis')
 parser.add_argument('--gfs', type=int, default=5, help='kernel size for gen')
-parser.add_argument('--nepoch', type=int, default=1000, help='number of epochs to train for')
+parser.add_argument('--nepoch', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--niter', type=int, default=10, help='number of iterations per training epoch')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -110,7 +110,8 @@ def weights_init(m):
     elif classname.find('BatchNorm') != -1:
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
-        
+
+
 # netG = netG(nc, nz, ngf, gfs, ngpu)
 netG = netG_transformer()
 
@@ -161,6 +162,10 @@ if opt.cuda:
 # summary(netD, (1, npx, npy))
 #
 # summary(netG, (nz, zx, zy))
+
+# # Make a folder if it doesn't exist
+if not os.path.exists('train_data'):
+    os.makedirs('train_data')
 
 gen_iterations = 0
 for epoch in range(opt.nepoch):
