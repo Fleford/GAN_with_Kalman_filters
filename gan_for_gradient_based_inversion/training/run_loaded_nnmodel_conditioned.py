@@ -35,7 +35,8 @@ epoch = 22
 # Load model
 # netG = netG(nc, nz, ngf, gfs, ngpu)
 netG = netG_transformer()
-netG.load_state_dict(torch.load('%s/netG_epoch_%d.pth' % (outf, epoch)))
+# netG.load_state_dict(torch.load('%s/netG_epoch_%d.pth' % (outf, epoch)))
+netG.load_state_dict(torch.load('./train_data_5_21_2020/netG_epoch_22.pth'))
 netG.to(device)
 netG.eval()
 print(netG)
