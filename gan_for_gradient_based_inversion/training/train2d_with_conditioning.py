@@ -255,3 +255,9 @@ print("Saving train2d_with_conditioning.py")
 src = "train2d_with_conditioning.py"
 dst = "train_data/train2d_with_conditioning"
 copyfile(src, dst)
+
+print()
+print("Saving nnmodels.py")
+src = "nnmodels.py"
+dst = "train_data/nnmodels.py"
+copyfile(src, dst)
