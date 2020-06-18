@@ -137,7 +137,7 @@ def generate_condition(input_matrix):
     ref_k_array = np.loadtxt("k_array_ref_gan.txt")
     ref_k_array = torch.as_tensor(ref_k_array, dtype=torch.float32)
     random_matrix = torch.randint_like(ref_k_array, 2)
-    for x in range(4):
+    for x in range(6):
         random_matrix = random_matrix * torch.randint_like(ref_k_array, 2)
     output_matrix = ref_k_array * random_matrix
 

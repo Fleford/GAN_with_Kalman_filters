@@ -29,13 +29,16 @@ npx = zx
 npy = zy
 # File directory
 outf = './train_data'
-epoch = 22
+epoch = 32
 
 # Load model
 # netG = netG(nc, nz, ngf, gfs, ngpu)
 netG = netG_transformer()
-# netG.load_state_dict(torch.load('%s/netG_epoch_%d.pth' % (outf, epoch)))
-netG.load_state_dict(torch.load('./train_data_5_21_2020/netG_epoch_22.pth'))
+netG.load_state_dict(torch.load('%s/netG_epoch_%d.pth' % (outf, epoch)))
+
+# netG.load_state_dict(torch.load('./train_data_5_21_2020/netG_epoch_22.pth'))
+# density: 4
+
 netG.to(device)
 netG.eval()
 print(netG)
@@ -46,7 +49,7 @@ def generate_condition(ref_k_array):
     # ref_k_array = np.loadtxt("k_array_ref_gan.txt")
     ref_k_array = torch.as_tensor(ref_k_array, dtype=torch.float32)
     random_matrix = torch.randint_like(ref_k_array, 2)
-    for x in range(5):
+    for x in range(6):
         random_matrix = random_matrix * torch.randint_like(ref_k_array, 2)
     print("Number of nonzero elements: ", np.count_nonzero(random_matrix))
     output_matrix = ref_k_array * random_matrix
@@ -68,6 +71,7 @@ print("noise matrix:")
 print(noise)
 print(noise.shape)
 print()
+breakpoint()
 
 # Turn off gradient calculation
 torch.set_grad_enabled(False)
