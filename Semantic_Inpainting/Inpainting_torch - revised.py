@@ -27,7 +27,7 @@ LearningRate = 0.1
 
 
 # Prepare GAN generator
-device = torch.device("cpu")
+device = torch.device("cuda:0")
 netG = netG(1, 1, 64, 5, 1)
 netG.load_state_dict(torch.load('netG_epoch_10.pth'))
 netG.to(device)
@@ -61,9 +61,8 @@ for i in range(0,Sample_Point):                                       # the loca
 plt.savefig('real_img_k.png')
 plt.close()
 
-
-real_img_k = torch.from_numpy(Reference_k.reshape(1,1,nrow,ncol)).float()
-mask_k = torch.from_numpy(mask_k).float()
+real_img_k = torch.from_numpy(Reference_k.reshape(1,1,nrow,ncol)).float().to(device)
+mask_k = torch.from_numpy(mask_k).float().to(device)
 
 z_optimum = nn.Parameter(torch.rand(nr, 1, zx, zy, device=device)*2-1)
 optimizer_z = optim.Adam([z_optimum], lr=LearningRate)
@@ -88,7 +87,7 @@ optimizer_z = optim.Adam([z_optimum], lr=LearningRate)
 #plt.close()
 
 print("Starting backprop to input ...")
-for epoch in range(30):
+for epoch in range(3):
     optimizer_z.zero_grad()    
     generated_k = netG(z_optimum)
 
@@ -100,9 +99,11 @@ for epoch in range(30):
 
     K = generated_k
     # k_array = K.cpu().squeeze().numpy()       # variable must be detached first
+    # k_array = K.detach().numpy().squeeze()
+    K = K.cpu()
     k_array = K.detach().numpy().squeeze()
     Average_K = np.array(k_array.mean(axis=0))                    # the average of K
-    Variance_K = np.array(np.var(k_array,axis = 0))               # the variance of K
+    Variance_K = np.array(np.var(k_array, axis=0))               # the variance of K
     plt.matshow(k_array[0])
     plt.savefig('k_array[0]_' + str(epoch) + '.png')
     plt.close()

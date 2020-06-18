@@ -71,7 +71,6 @@ print("noise matrix:")
 print(noise)
 print(noise.shape)
 print()
-breakpoint()
 
 # Turn off gradient calculation
 torch.set_grad_enabled(False)
