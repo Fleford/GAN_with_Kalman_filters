@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-
 class netD(nn.Module):
     def __init__(self, nc = 1, ndf = 64, dfs = 9, ngpu = 1):
         super(netD, self).__init__()
@@ -82,8 +81,7 @@ class netD(nn.Module):
 #            output = self.main(input)
 #       
 #        return output.view(-1, 1).squeeze(1)
-
-
+    
 class netG(nn.Module):
     def __init__(self, nc = 1, nz = 1, ngf = 64, gfs = 5, ngpu = 1):
         super(netG, self).__init__()
@@ -118,11 +116,11 @@ class netG(nn.Module):
                 nn.ReLU(True),
                 
                 ### Start dilations ###
-                nn.ConvTranspose2d(     nc,ngf, gfs, 1, 6, output_padding=0, bias=False, dilation=3),
+                nn.ConvTranspose2d(     nc,ngf, gfs, 1, 6, output_padding=0,bias=False,dilation=3), 
                 nn.ReLU(True),
                 nn.InstanceNorm2d(ngf),
                
-                nn.ConvTranspose2d(    ngf,  nc, gfs, 1, 10, output_padding=0, bias=False, dilation=5),
+                nn.ConvTranspose2d(    ngf,  nc, gfs, 1, 10, output_padding=0, bias=False,dilation=5),
                 
                 nn.Tanh()
                 
@@ -191,23 +189,23 @@ class netG_transformer(nn.Module):
 
         self.main = nn.Sequential(
 
-            nn.ConvTranspose2d(2, 2**5, 7, 1, 3, bias=False),
-            nn.BatchNorm2d(2**5),
+            nn.ConvTranspose2d(2, 2**9, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**9),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(2 ** 5, 2 ** 4, 7, 1, 3, bias=False),
-            nn.BatchNorm2d(2**4),
+            nn.ConvTranspose2d(2 ** 9, 2 ** 8, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**8),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(2 ** 4, 2 ** 3, 7, 1, 3, bias=False),
-            nn.BatchNorm2d(2**3),
+            nn.ConvTranspose2d(2 ** 8, 2 ** 7, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**7),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(2 ** 3, 2 ** 4, 7, 1, 3, bias=False),
-            nn.BatchNorm2d(2**4),
+            nn.ConvTranspose2d(2 ** 7, 2 ** 6, 7, 1, 3, bias=False),
+            nn.BatchNorm2d(2**6),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(2 ** 4, 2 ** 5, 7, 1, 3, bias=False),
+            nn.ConvTranspose2d(2 ** 6, 2 ** 5, 7, 1, 3, bias=False),
             nn.BatchNorm2d(2**5),
             nn.ReLU(True),
 
@@ -241,199 +239,32 @@ class netG_transformer(nn.Module):
         return output_from_G
 
 
-class netG_conditioned(nn.Module):
-    def __init__(self, nc = 1, nz = 1, ngf = 64, gfs = 5, ngpu = 1):
-        super(netG_conditioned, self).__init__()
-        self.ngpu = ngpu
-
-        self.downsample0 = nn.Sequential(
-            nn.Upsample(size=(9, 9), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.downsample1 = nn.Sequential(
-            nn.Upsample(size=(17, 17), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.downsample2 = nn.Sequential(
-            nn.Upsample(size=(33, 33), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.downsample3 = nn.Sequential(
-            nn.Upsample(size=(65, 65), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.downsample4 = nn.Sequential(
-            nn.Upsample(size=(129, 129), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.downsample5 = nn.Sequential(
-            nn.Upsample(size=(129, 129), mode='bilinear', align_corners=True),
-            nn.ConvTranspose2d(1, 16, 1, bias=False),
-            nn.ReLU(True)
-        )
-
-        self.layer0 = nn.Sequential(
-           nn.ConvTranspose2d(nz, ngf * 8, gfs, 2, gfs // 2, bias=False),
-           nn.ReLU(True),
-           nn.BatchNorm2d(ngf * 8)
-        )
-
-        self.layer1 = nn.Sequential(
-           nn.ConvTranspose2d(528, ngf * 4, gfs, 2, gfs // 2, bias=False),
-           nn.ReLU(True),
-           nn.BatchNorm2d(ngf * 4)
-        )
-
-        self.layer2 = nn.Sequential(
-           nn.ConvTranspose2d(272, ngf * 2, gfs, 2, gfs // 2, bias=False),
-           nn.ReLU(True),
-           nn.BatchNorm2d(ngf * 2)
-        )
-
-        self.layer3 = nn.Sequential(
-           nn.ConvTranspose2d(144, ngf, gfs, 2, gfs // 2, bias=False),
-           nn.ReLU(True),
-           nn.BatchNorm2d(ngf)
-        )
-
-        self.layer4 = nn.Sequential(
-           nn.ConvTranspose2d(80, nc, gfs, 2, 2, bias=False),
-           nn.ReLU(True)
-        )
-
-        self.layer5_dilation = nn.Sequential(
-           ### Start dilations ###
-           nn.ConvTranspose2d(17, 64, gfs, 1, 6, output_padding=0, bias=False, dilation=3),
-           nn.ReLU(True),
-           nn.BatchNorm2d(64)
-        )
-
-        self.layer6 = nn.Sequential(
-           nn.ConvTranspose2d(80, nc, gfs, 1, 10, output_padding=0, bias=False, dilation=5),
-           nn.Tanh()
-        )
-
-        # self.main = nn.Sequential(
-        #
-        #        nn.ConvTranspose2d(     nz, ngf * 8, gfs, 2, gfs//2, bias=False),
-        #        nn.ReLU(True),
-        #        nn.BatchNorm2d(ngf * 8),
-        #
-        #        nn.ConvTranspose2d(ngf * 8, ngf * 4, gfs, 2, gfs//2, bias=False),
-        #        nn.ReLU(True),
-        #        nn.BatchNorm2d(ngf * 4),
-        #
-        #        nn.ConvTranspose2d(ngf * 4, ngf * 2, gfs, 2, gfs//2, bias=False),
-        #        nn.ReLU(True),
-        #        nn.BatchNorm2d(ngf * 2),
-        #
-        #        nn.ConvTranspose2d(ngf * 2,     ngf, gfs, 2, gfs//2, bias=False),
-        #        nn.ReLU(True),
-        #        nn.BatchNorm2d(ngf),
-        #
-        #        nn.ConvTranspose2d(    ngf,      nc, gfs, 2, 2, bias=False),
-        #        nn.ReLU(True),
-        #
-        #        ### Start dilations ###
-        #        nn.ConvTranspose2d(     nc, 64, gfs, 1, 6, output_padding=0,bias=False,dilation=3),
-        #        nn.ReLU(True),
-        #        nn.BatchNorm2d(64),
-        #
-        #        nn.ConvTranspose2d(    64,  nc, gfs, 1, 10, output_padding=0, bias=False,dilation=5),
-        #        nn.Tanh()
-        #
-        #    )
-
-    def forward(self, input, input_condition):
-        print(input.shape)
-        print(input_condition.shape)
-
-        layer0 = self.layer0(input)
-        downsample0 = self.downsample0(input_condition)
-        x = torch.cat([downsample0, layer0], dim=1)
-
-        layer1 = self.layer1(x)
-        downsample1 = self.downsample1(input_condition)
-        x = torch.cat([downsample1, layer1], dim=1)
-        print(x.shape)
-
-        layer2 = self.layer2(x)
-        print(layer2.shape)
-        downsample2 = self.downsample2(input_condition)
-        x = torch.cat([downsample2, layer2], dim=1)
-        print(x.shape)
-
-        layer3 = self.layer3(x)
-        print(layer3.shape)
-        downsample3 = self.downsample3(input_condition)
-        x = torch.cat([downsample3, layer3], dim=1)
-        print(x.shape)
-
-        layer4 = self.layer4(x)
-        print(layer4.shape)
-        downsample4 = self.downsample4(input_condition)
-        x = torch.cat([downsample4, layer4], dim=1)
-        print(x.shape)
-
-        layer5_dilation = self.layer5_dilation(x)
-        print(layer5_dilation.shape)
-        downsample5 = self.downsample5(input_condition)
-        x = torch.cat([downsample5, layer5_dilation], dim=1)
-        print(x.shape)
-
-        output = self.layer6(x)
-        print(output.shape)
-
-        breakpoint()
-
-        return output
-
-
 # For testing purposes only
 if __name__ == "__main__":
     device = "cpu"
-
-    # # # Test code for netG_conditioned
-    test_input = torch.rand(3, 1, 5, 5, device=device) * 2 - 1
-    test_condition = torch.rand(3, 1, 129, 129, device=device) * 2 - 1
-    netG_conditioned_1 = netG_conditioned()
-    test_output = netG_conditioned_1(test_input, test_condition)
-    breakpoint()
-
-
-
-
-    # # # Test code for netG_transformer
-    # # input_noise = torch.rand(batch_size, nz, zx, zy, device=device) * 2 - 1
-    # k_matrix = torch.rand(3, 1, 97, 97, device=device) * 2 - 1
-    # condition_matrix = torch.randint_like(k_matrix, 2) * torch.randint_like(k_matrix, 2)\
-    #                    * torch.randint_like(k_matrix, 2)
-    # inverse_condition_matrix = torch.ones_like(condition_matrix) - condition_matrix
-    # input_matrix = torch.cat((k_matrix, condition_matrix), 1)
+    # input_noise = torch.rand(batch_size, nz, zx, zy, device=device) * 2 - 1
+    k_matrix = torch.rand(3, 1, 8, 8, device=device) * 2 - 1
+    condition_matrix = torch.randint_like(k_matrix, 2) * torch.randint_like(k_matrix, 2)\
+                       * torch.randint_like(k_matrix, 2)
+    inverse_condition_matrix = torch.ones_like(condition_matrix) - condition_matrix
+    input_matrix = torch.cat((k_matrix, condition_matrix), 1)
     # print("input_matrix")
-    # # print(input_matrix)
+    # print(input_matrix)
     # print(input_matrix.shape)
-    # print("k_matrix")
-    # # print(k_matrix)
-    # print(k_matrix.shape)
+    print("k_matrix")
+    # print(k_matrix)
+    print(k_matrix.shape)
     # print("condition_matrix")
-    # # print(condition_matrix)
+    # print(condition_matrix)
     # print(condition_matrix.shape)
     # netG_transformer_1 = netG_transformer()
     # output = netG_transformer_1(k_matrix, condition_matrix)
     # print("netG_transformer_1")
     # print(netG_transformer_1)
-    # print("output")
-    # # print(output)
-    # print(output.shape)
+    netG = netG(1, 1, 64, 5, 1)
+    print(netG)
+    output = netG(k_matrix)
+    print("output")
+    # print(output)
+    print(output.shape)
 

@@ -6,6 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/gan_for_gradient_based_inversion" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/gan_for_gradient_based_inversion/training" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python-Ex" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Progressive-GAN-pytorch-master" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Progressive-GAN-pytorch-master/all_images" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Progressive-GAN-pytorch-master/all_images/training_images" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/GeoModeling_Conditional_ProGAN-master/Code/0_Code for only conditioning to global features" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -71,4 +71,12 @@ def save_tensor2D(tensor, filename):
 
 def zx_to_npx(zx, depth):
     return (zx-1)*2**depth + 1
-    
+
+
+# For testing purposes only
+if __name__ == "__main__":
+    texture_dir = 'C:/Users/Fleford/PycharmProjects/gan_for_gradient_based_inv/training/ti/'
+    data_iter   = get_texture2D_iter(texture_dir)
+
+    for data in data_iter:
+        breakpoint()

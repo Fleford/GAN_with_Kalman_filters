@@ -11,10 +11,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from nnmodels import netD
-from nnmodels import netG
+from nnmodels import netG_conditioned
 import matplotlib.pyplot as plt
 
-nrow = 129 
+nrow = 129
 ncol = 129
 
 nr = 100       # the number of realizations
@@ -22,27 +22,29 @@ nr = 100       # the number of realizations
 # Dimension of latent vector
 zx = 5
 zy = 5
-prior_weight = 3
+prior_weight = 0.1
 LearningRate = 0.1
 
 
 # Prepare GAN generator
 device = torch.device("cuda:0")
-netG = netG(1, 1, 64, 5, 1)
-netG.load_state_dict(torch.load('netG_epoch_10.pth'))
+# netG = netG(1, 1, 64, 5, 1)
+netG = netG_conditioned()
+netG.load_state_dict(torch.load('netG_epoch_97.pth'))
 netG.to(device)
 netG.eval()
 torch.set_grad_enabled(True)    # Gradients must be set to true
 
 netD = netD(1, 64, 5, 1)
-netD.load_state_dict(torch.load('netD_epoch_10.pth'))
+netD.load_state_dict(torch.load('netD_epoch_97.pth'))
 netD.to(device)
 netD.eval()
 torch.set_grad_enabled(True)    # Gradients must be set to true
 
 # Create mask
-Sample_Point = 90
+Sample_Point = 10000
 Reference_k = np.loadtxt('Ref_ln_K.txt')
+print(Reference_k.shape)
 mask_k = np.zeros((nrow, ncol))
 Sample = np.zeros((Sample_Point, 2))
 for i in range(Sample_Point):
@@ -58,10 +60,10 @@ plt.matshow(Reference_k)
 for i in range(0,Sample_Point):                                       # the location of sample points
     plt.scatter(Sample[i, 0], Sample[i, 1], marker='o', c='', edgecolors='r', s = 10)
     
-plt.savefig('real_img_k.png')
+plt.savefig("Results/" + 'real_img_k.png')
 plt.close()
 
-real_img_k = torch.from_numpy(Reference_k.reshape(1,1,nrow,ncol)).float().to(device)
+real_img_k = torch.from_numpy(Reference_k.reshape(1, 1, nrow, ncol)).float().to(device)
 mask_k = torch.from_numpy(mask_k).float().to(device)
 
 z_optimum = nn.Parameter(torch.rand(nr, 1, zx, zy, device=device)*2-1)
@@ -87,7 +89,7 @@ optimizer_z = optim.Adam([z_optimum], lr=LearningRate)
 #plt.close()
 
 print("Starting backprop to input ...")
-for epoch in range(3):
+for epoch in range(200):
     optimizer_z.zero_grad()    
     generated_k = netG(z_optimum)
 
@@ -105,13 +107,13 @@ for epoch in range(3):
     Average_K = np.array(k_array.mean(axis=0))                    # the average of K
     Variance_K = np.array(np.var(k_array, axis=0))               # the variance of K
     plt.matshow(k_array[0])
-    plt.savefig('k_array[0]_' + str(epoch) + '.png')
+    plt.savefig("Results/" + 'k_array[0]_' + str(epoch) + '.png')
     plt.close()
     plt.matshow(Average_K)
-    plt.savefig('Average_K_'+str(epoch)+'.png')
+    plt.savefig("Results/" + 'Average_K_'+str(epoch)+'.png')
     plt.close()
     plt.matshow(Variance_K)
-    plt.savefig('Variance_K_'+str(epoch)+'.png')
+    plt.savefig("Results/" + 'Variance_K_'+str(epoch)+'.png')
     plt.close()
     
     discrim_out = netD(generated_k)
