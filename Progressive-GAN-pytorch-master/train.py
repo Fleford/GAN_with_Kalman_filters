@@ -23,7 +23,6 @@ def accumulate(model1, model2, decay=0.999):
     for k in par1.keys():
         par1[k].data.mul_(decay).add_(1 - decay, par2[k].data)
 
-
 def imagefolder_loader(path):
     def loader(transform):
         data = datasets.ImageFolder(path, transform=transform)
@@ -108,7 +107,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     copy('utils.py', log_folder + '/utils_%s.py' % post_fix)
 
     alpha = 0
-    one = torch.FloatTensor([1]).to(device)
+    # one = torch.FloatTensor([1]).to(device)
+    one = torch.tensor(1, dtype=torch.float)
     mone = one * -1
     iteration = 0
 
