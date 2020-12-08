@@ -11,10 +11,11 @@
       <sourceFolder url="file://$MODULE_DIR$/Progressive-GAN-pytorch-master/all_images/training_images" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/GeoModeling_Conditional_ProGAN-master/Code/0_Code for only conditioning to global features" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
+    <option name="projectConfiguration" value="Nosetests" />
     <option name="PROJECT_TEST_RUNNER" value="Nosetests" />
   </component>
 </module>

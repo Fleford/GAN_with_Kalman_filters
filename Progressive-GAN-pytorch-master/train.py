@@ -108,7 +108,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
     alpha = 0
     # one = torch.FloatTensor([1]).to(device)
-    one = torch.tensor(1, dtype=torch.float)
+    # one = torch.tensor(1, dtype=torch.float)
+    one = torch.tensor(1, dtype=torch.float).to(device)
     mone = one * -1
     iteration = 0
 
