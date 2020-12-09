@@ -3,7 +3,7 @@ import fileinput
 
 # Program that makes seperate copies of the test program for a specfic cuda node
 
-cuda_num = 1
+cuda_num = 0
 cuda_suffix = '_cuda' + str(int(cuda_num))
 
 print('train' + cuda_suffix + '.py')
@@ -35,5 +35,5 @@ with fileinput.FileInput(train_dst, inplace=True) as file:
                            'copy(\'progan_modules' + cuda_suffix + '.py\', log_folder + \'/model_%s.py\' % post_fix)'), end='')
 with fileinput.FileInput(train_dst, inplace=True) as file:
     for line in file:
-        print(line.replace('one = torch.FloatTensor([1]).to(device))',
+        print(line.replace('one = torch.FloatTensor([1]).to(device)',
                            'one = torch.tensor(1, dtype=torch.float).to(device)'), end='')

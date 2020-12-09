@@ -23,6 +23,7 @@ def accumulate(model1, model2, decay=0.999):
     for k in par1.keys():
         par1[k].data.mul_(decay).add_(1 - decay, par2[k].data)
 
+
 def imagefolder_loader(path):
     def loader(transform):
         data = datasets.ImageFolder(path, transform=transform)
@@ -67,7 +68,7 @@ def generate_condition(input_matrix, density=10):
     return output_matrix.cuda(), torch.as_tensor(random_matrix, dtype=torch.float32, device=device)
 
 
-def train(generator, discriminator, init_step, loader, total_iter=600000, max_step=5):
+def train(generator, discriminator, init_step, loader, total_iter=600000, max_step=7):      # max_step=7)
     step = init_step  # can be 1 = 8, 2 = 16, 3 = 32, 4 = 64, 5 = 128, 6 = 128
     # data_loader = sample_data(loader, 4 * 2 ** step)
     # dataset = iter(data_loader)
@@ -107,7 +108,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     copy('utils.py', log_folder + '/utils_%s.py' % post_fix)
 
     alpha = 0
-    one = torch.tensor(1, dtype=torch.float).to(device)
+    one = torch.FloatTensor([1]).to(device)
     mone = one * -1
     iteration = 0
 
@@ -142,7 +143,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         # Scale training image using avg downsampling
         real_image_raw_res = torch.Tensor(next(data_iter)).to(device)
-        kernel_width = 2 ** (5 - step)
+        kernel_width = 2 ** (7 - step)      # 2 ** (max_step - step)
         avg_downsampler = torch.nn.AvgPool2d((kernel_width, kernel_width), stride=(kernel_width, kernel_width))
         cond_downsampler = torch.nn.MaxPool2d((kernel_width, kernel_width), stride=(kernel_width, kernel_width))
         real_image = avg_downsampler(real_image_raw_res)
@@ -291,7 +292,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=200000,
+    parser.add_argument('--total_iter', type=int, default=400000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')
