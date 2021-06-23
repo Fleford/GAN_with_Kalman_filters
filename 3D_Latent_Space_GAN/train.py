@@ -107,26 +107,26 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     copy('progan_modules.py', log_folder + '/model_%s.py' % post_fix)
     copy('utils.py', log_folder + '/utils_%s.py' % post_fix)
 
-    alpha = 0
-    one = torch.FloatTensor([1]).to(device)
-    # one = torch.tensor(1, dtype=torch.float).to(device)
+    # alpha = 0
+    # one = torch.FloatTensor([1]).to(device)
+    one = torch.tensor(1, dtype=torch.float).to(device)
     mone = one * -1
     iteration = 0
 
     # Prepare reference batch for display
-    data_iter_sample = get_texture2D_iter('ti/', batch_size=5 * 10)
-    real_image_raw_res_sample = torch.Tensor(next(data_iter_sample)).to(device)
-    cond_array_sample, cond_mask_sample = generate_condition(real_image_raw_res_sample)
+    # data_iter_sample = get_texture2D_iter('ti/', batch_size=5 * 10)
+    # real_image_raw_res_sample = torch.Tensor(next(data_iter_sample)).to(device)
+    # cond_array_sample, cond_mask_sample = generate_condition(real_image_raw_res_sample)
     # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:0')
 
     # broadcast first cond_array to whole batch
     # one_cond_array_sample = torch.zeros_like(cond_array_sample)
-    for slice in range(len(cond_array_sample) // 2):
-        cond_array_sample[slice] = cond_array_sample[0]
+    # for slice in range(len(cond_array_sample) // 2):
+    #     cond_array_sample[slice] = cond_array_sample[0]
     # cond_array_sample = one_cond_array_sample
 
     data_iter = get_texture2D_iter('ti/', batch_size=batch_size)
-    cntxt_loss = torch.FloatTensor([69]).to(device)
+    # cntxt_loss = torch.FloatTensor([69]).to(device)
 
     for i in pbar:
         discriminator.zero_grad()
@@ -156,17 +156,17 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         ### 1. train Discriminator
         b_size = real_image.size(0)
         # label = torch.zeros(b_size).to(device)
-        real_predict = discriminator(
-            real_image, step=step, alpha=alpha)
+        real_predict = discriminator(real_image, step=step, alpha=alpha)
 
         real_predict = real_predict.mean() - 0.001 * (real_predict ** 2).mean()
         real_predict.backward(mone)
 
         # sample input data: vector for Generator
-        gen_z = torch.randn(b_size, input_code_size).to(device)
+        # gen_z = torch.randn(b_size, input_code_size).to(device)
+        gen_z = torch.randn(b_size, input_z_channels, 2, 2).to(device)
 
         # generate condition array
-        cond_array, cond_mask = generate_condition(real_image_raw_res)
+        # cond_array, cond_mask = generate_condition(real_image_raw_res)
 
         # # broadcast first raw image to the whole batch
         # # one_real_image_raw_res = torch.zeros_like(real_image_raw_res)
@@ -186,9 +186,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         #     cond_mask[slice] = cond_mask[0]
         # # cond_mask = one_cond_mask
 
-        fake_image = generator(gen_z, cond_array, step=step, alpha=alpha)
-        fake_predict = discriminator(
-            fake_image.detach(), step=step, alpha=alpha)
+        fake_image = generator(gen_z, step=step, alpha=alpha)
+        fake_predict = discriminator(fake_image.detach(), step=step, alpha=alpha)
         fake_predict = fake_predict.mean()
         fake_predict.backward(one)
 
@@ -214,23 +213,24 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             predict = discriminator(fake_image, step=step, alpha=alpha)
 
             # Calculate context loss (conditioning hard data)
-            fake_image_upsampled = F.interpolate(fake_image, size=(128, 128), mode="nearest")
+            # fake_image_upsampled = F.interpolate(fake_image, size=(128, 128), mode="nearest")
 
             # real_image_upsampled = F.interpolate(real_image, size=(128, 128), mode="nearest")
             # context_loss_array = ((fake_image_upsampled - real_image_upsampled) ** 2) * cond_mask
 
-            context_loss_array = ((fake_image_upsampled - real_image_raw_res) ** 2) * cond_mask
+            # context_loss_array = ((fake_image_upsampled - real_image_raw_res) ** 2) * cond_mask
 
             # ds_cond_mask = cond_downsampler(cond_mask)
-            ds_context_loss_array = ((fake_image_upsampled - real_image_raw_res) ** 2) * cond_mask
-            ds_context_loss_value = torch.sum(ds_context_loss_array)
-            ds_cntxt_loss = ds_context_loss_value.item()
+            # ds_context_loss_array = ((fake_image_upsampled - real_image_raw_res) ** 2) * cond_mask
+            # ds_context_loss_value = torch.sum(ds_context_loss_array)
+            # ds_cntxt_loss = ds_context_loss_value.item()
 
-            context_loss_value = torch.sum(context_loss_array).log()
+            # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 1.0 * context_loss_value
+            # loss = -predict.mean() + 1.0 * context_loss_value
+            loss = -predict.mean()
             gen_loss_val += loss.item()
-            cntxt_loss = context_loss_value.item()
+            # cntxt_loss = context_loss_value.item()
 
             loss.backward()
             g_optimizer.step()
@@ -238,8 +238,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         if (i + 1) % 1000 == 0 or i == 0:
             with torch.no_grad():
-                images = g_running(torch.randn(5 * 10, input_code_size).to(device),
-                                   cond_array_sample, step=step, alpha=alpha).data.cpu()
+                sample_z = torch.randn(5*10, input_z_channels, 2, 2).to(device)
+                images = g_running(sample_z, step=step, alpha=alpha).data.cpu()
                 images = F.interpolate(images, size=(128, 128), mode="nearest")
                 utils.save_image(
                     images,
@@ -257,13 +257,12 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         if (i + 1) % 500 == 0:
             state_msg = (f'{i + 1}; G: {gen_loss_val / (500 // n_critic):.3f}; D: {disc_loss_val / 500:.3f};'
-                         f' Grad: {grad_loss_val / 500:.3f}; Alpha: {alpha:.3f}; Step: {step:.3f}; Iteration: {iteration:.3f};'
-                         f' Context Loss: {cntxt_loss:.3f};' f' DS Context Loss: {ds_cntxt_loss:.3f};')
+                         f' Grad: {grad_loss_val / 500:.3f}; Alpha: {alpha:.3f}; Step: {step:.3f}; Iteration: {iteration:.3f};')
             print(real_image.shape)
 
             log_file = open(log_file_name, 'a+')
-            new_line = "%.5f,%.5f,%.5f,%.5f\n" % (
-            gen_loss_val / (500 // n_critic), disc_loss_val / 500, cntxt_loss, ds_cntxt_loss)
+            new_line = "%.5f,%.5f\n" % (
+            gen_loss_val / (500 // n_critic), disc_loss_val / 500)
             log_file.write(new_line)
             log_file.close()
 
@@ -306,14 +305,14 @@ if __name__ == '__main__':
 
     trial_name = args.trial_name
     device = torch.device("cuda:%d" % (args.gpu_id))
-    input_code_size = args.z_dim
+    input_z_channels = args.z_dim    # Thicness of z vector
     batch_size = args.batch_size
     n_critic = args.n_critic
 
-    generator = Generator(in_channel=args.channel, input_code_dim=input_code_size, pixel_norm=args.pixel_norm,
+    generator = Generator(in_channel=args.channel, input_z_channels=input_z_channels, pixel_norm=args.pixel_norm,
                           tanh=args.tanh).to(device)
     discriminator = Discriminator(feat_dim=args.channel).to(device)
-    g_running = Generator(in_channel=args.channel, input_code_dim=input_code_size, pixel_norm=args.pixel_norm,
+    g_running = Generator(in_channel=args.channel, input_z_channels=input_z_channels, pixel_norm=args.pixel_norm,
                           tanh=args.tanh).to(device)
 
     # # you can directly load a pretrained model here
