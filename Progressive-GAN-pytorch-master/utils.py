@@ -78,6 +78,7 @@ if __name__ == "__main__":
 
     for data in data_iter:
         data_tensor = torch.Tensor(data).to(device)
+        breakpoint()
         data_tensor = F.interpolate(data_tensor, (presize, presize), mode='bilinear', align_corners=False)
         data_resize = F.interpolate(data_tensor, (size, size), mode='bilinear', align_corners=False)
         disp_data = data_resize.to("cpu")
