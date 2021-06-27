@@ -10,7 +10,7 @@ def floodfill_data_pair(_):
     training_img = cv2.imread('ti.png', 0)
 
     # Randomly pick a part of the image
-    window_size = 128
+    window_size = 256
     top_left_row_coord = np.random.randint(training_img.shape[0] - window_size + 1)
     top_left_col_coord = np.random.randint(training_img.shape[1] - window_size + 1)
 
@@ -22,13 +22,12 @@ def floodfill_data_pair(_):
     img_channels[img_channels == 255] = 1
     # print(img_channels.shape)
     img_channels = cv2.pyrDown(img_channels)
-    img_channels = cv2.pyrDown(img_channels)
+    # img_channels = cv2.pyrDown(img_channels)
+    # img_channels = cv2.pyrDown(img_channels)
     # print(img_channels.shape)
 
     # Prep seed image
     img_seed = np.zeros_like(img_channels)
-    kernel = np.ones((3, 3), np.uint8)  # flow in all directions
-    img_seed = cv2.dilate(img_seed, kernel, iterations=2)
 
     # Pick a random point in a channel
     while True:
@@ -38,6 +37,8 @@ def floodfill_data_pair(_):
             img_seed[y, x] = 1
             break
 
+    kernel = np.ones((3, 3), np.uint8)  # flow in all directions
+    img_seed = cv2.dilate(img_seed, kernel, iterations=1)
     img_dilated = img_seed  # load seed into working array
 
     # Prep sum array
@@ -45,7 +46,6 @@ def floodfill_data_pair(_):
     img_sum = img_sum + 1.0 * img_dilated
 
     # Prep dilation kernel
-    # kernel = np.ones((3, 2), np.uint8)  # flow only left to right
     kernel = np.ones((3, 3), np.uint8)  # flow in all directions
 
     # Perform floodfill operation
@@ -108,10 +108,12 @@ if __name__ == "__main__":
     # x, y = generate_training_batch()
     # print(x.shape)
     # print(y.shape)
-    generate_training_batch_mp(batch_size=64)
+    # generate_training_batch_mp(batch_size=64)
 
+    img_seed, img_channels, img_sum_clip = floodfill_data_pair(1)
     # Show results
-    # plt.matshow(seed)
-    # plt.matshow(channels)
-    # plt.matshow(clip)
-    # plt.show()
+    print(img_sum_clip.shape)
+    plt.matshow(img_seed)
+    plt.matshow(img_channels)
+    plt.matshow(img_sum_clip)
+    plt.show()

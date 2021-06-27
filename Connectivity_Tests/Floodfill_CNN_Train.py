@@ -21,7 +21,7 @@ def floodfill_data_pair(_):
     training_img = cv2.imread('ti.png', 0)
 
     # Randomly pick a part of the image
-    window_size = 128
+    window_size = 256
     top_left_row_coord = np.random.randint(training_img.shape[0] - window_size + 1)
     top_left_col_coord = np.random.randint(training_img.shape[1] - window_size + 1)
 
@@ -32,7 +32,7 @@ def floodfill_data_pair(_):
     # Prep test image
     img_channels[img_channels == 255] = 1
     # print(img_channels.shape)
-    # img_channels = cv2.pyrDown(img_channels)
+    img_channels = cv2.pyrDown(img_channels)
     # img_channels = cv2.pyrDown(img_channels)
     # print(img_channels.shape)
 
@@ -48,7 +48,7 @@ def floodfill_data_pair(_):
             break
 
     kernel = np.ones((3, 3), np.uint8)  # flow in all directions
-    img_seed = cv2.dilate(img_seed, kernel, iterations=2)
+    img_seed = cv2.dilate(img_seed, kernel, iterations=1)
     img_dilated = img_seed  # load seed into working array
 
     # Prep sum array
