@@ -10,7 +10,7 @@ class UNet(nn.Module):
         self,
         in_channels=1,
         n_classes=1,
-        depth=5,
+        depth=6,
         wf=6,
         padding=True,
         batch_norm=False,
@@ -157,9 +157,9 @@ class ConvBlock(nn.Module):
 # For testing purposes only
 if __name__ == "__main__":
     # # # Test code for generator
-    model = UNet(in_channels=2, n_classes=1, padding=True, up_mode='upconv')
+    model = UNet(in_channels=2, n_classes=1, padding=False, up_mode='upconv')
     # conv_block = ConvBlock(in_size=1, out_size=10)
-    test_input = torch.rand(4, 2, 128, 128) * 2 - 1
+    test_input = torch.rand(4, 2, 256, 256) * 2 - 1
     output = model(test_input)
     # conv_output = conv_block(test_input)
     # plt.matshow(conv_output[0, 0].detach().numpy())

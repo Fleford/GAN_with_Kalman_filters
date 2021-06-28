@@ -84,7 +84,7 @@ def floodfill_data_pair(_):
     return img_seed, img_channels, img_sum_clip
 
 
-def generate_training_batch(batch_size=64, windowsize=128):
+def generate_training_batch(batch_size=32, windowsize=128):
     data_x = np.zeros((batch_size, 2, windowsize, windowsize))
     data_y = np.zeros((batch_size, 1, windowsize, windowsize))
     for i in range(batch_size):
@@ -93,7 +93,7 @@ def generate_training_batch(batch_size=64, windowsize=128):
     return data_x, data_y
 
 
-def generate_training_batch_mp(batch_size=64):
+def generate_training_batch_mp(batch_size=32):
     num_list = np.arange(batch_size)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:  # 14.5
