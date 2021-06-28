@@ -21,7 +21,7 @@ def floodfill_data_pair(_):
     training_img = cv2.imread('ti.png', 0)
 
     # Randomly pick a part of the training image
-    window_size = 256
+    window_size = 512
     top_left_row_coord = np.random.randint(training_img.shape[0] - window_size + 1)
     top_left_col_coord = np.random.randint(training_img.shape[1] - window_size + 1)
 
@@ -33,6 +33,7 @@ def floodfill_data_pair(_):
     img_channels[img_channels == 255] = 1
 
     # Scale down the image
+    img_channels = cv2.pyrDown(img_channels)
     img_channels = cv2.pyrDown(img_channels)
 
     # Prep seed image
@@ -52,7 +53,7 @@ def floodfill_data_pair(_):
 
     # Introduce a blockage
     img_blockage = np.ones_like(img_channels)
-    for _ in range(2):
+    for _ in range(16):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
@@ -68,6 +69,7 @@ def floodfill_data_pair(_):
 
     # Prep dilation kernel
     kernel = np.ones((3, 3), np.uint8)  # flow in all directions
+    # kernel = np.ones((3, 2), np.uint8)  # flow in all directions
 
     # Perform floodfill operation
     while True:
