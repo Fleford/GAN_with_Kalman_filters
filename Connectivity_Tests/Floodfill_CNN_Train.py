@@ -93,7 +93,7 @@ def floodfill_data_pair(_):
     img_sum_clip[img_sum_clip != 0] = 1
 
     # Return Results
-    return img_seed, img_channels, img_sum_clip
+    return img_seed, img_channels, img_sum
 
 
 def generate_training_batch(batch_size=32, windowsize=128):
