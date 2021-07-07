@@ -34,7 +34,7 @@ generator = Generator(in_channel=128, input_z_channels=input_z_size, pixel_norm=
 
 generator.load_state_dict(torch.load('trial_test18_2021-06-24_12_58/checkpoint/400000_g.model'))
 
-# Prepare z vectors for training
+# Prepare z vectors for training (top_bottom)
 gen_z_first_half = torch.randn(b_size//2, input_z_size, 2, 2).to(device)
 gen_z_top_swap = torch.flip(gen_z_first_half[:, :, 0:gen_z_first_half.shape[2]//2, :], dims=[0])
 gen_z_bttm = gen_z_first_half[:, :, gen_z_first_half.shape[2]//2:gen_z_first_half.shape[2], :]
@@ -53,7 +53,7 @@ print(gen_z.shape)
 print(gen_z[gen_z.shape[0]//2, 0])
 
 
-#3 Prep imgs for spatial loss function
+# Prep imgs for spatial loss function (top_bottom)
 gen_imgs_first_half = torch.randn(b_size//2, input_z_size, 4, 4).to(device)
 gen_imgs_top_swap = torch.flip(gen_imgs_first_half[:, :, 0:gen_imgs_first_half.shape[2]//2, :], dims=[0])
 gen_imgs_bttm = gen_imgs_first_half[:, :, gen_imgs_first_half.shape[2]//2:gen_imgs_first_half.shape[2], :]
@@ -72,8 +72,6 @@ print(gen_imgs_bttm[0, 0])
 print(gen_imgs_second_half[0, 0])
 print(gen_imgs[gen_imgs.shape[0]//2, 0])
 print(gen_imgs.shape)
-
-breakpoint()
 
 # sample input data: vector for Generator
 gen_z_a = torch.randn(b_size, input_z_size, 2, 2).to(device)
@@ -99,11 +97,57 @@ fake_image_a_rot180 = generator(gen_z_a_rot180, step=7, alpha=1.0)
 # fake_image_ab = generator(gen_z_ab, step=7, alpha=1.0)
 
 # # plot sample of fake images
-plt.matshow(fake_image_a[0, 0].cpu().detach().numpy())
-plt.matshow(fake_image_a_rot180[0, 0].cpu().detach().numpy())
+# plt.matshow(fake_image_a[0, 0].cpu().detach().numpy())
+# plt.matshow(fake_image_a_rot180[0, 0].cpu().detach().numpy())
 # plt.matshow(fake_image_b[0, 0].cpu().detach().numpy())
 # plt.matshow(fake_image_ab[0, 0].cpu().detach().numpy())
 
-plt.show()
+# plt.show()
 
+
+print()
+
+# # Prepare z vectors for training (left_right)
+# gen_z_first_half = torch.randn(b_size//2, input_z_size, 2, 2).to(device)
+# gen_z_left_swap = torch.flip(gen_z_first_half[:, :, :, 0:gen_z_first_half.shape[3]//2], dims=[0])
+# gen_z_right = gen_z_first_half[:, :, :, gen_z_first_half.shape[3]//2:gen_z_first_half.shape[3]]
+# gen_z_second_half = torch.cat((gen_z_left_swap, gen_z_right), dim=3)
+# gen_z = torch.cat((gen_z_first_half, gen_z_second_half), dim=0)
+#
+# print(gen_z_left_swap.shape)
+# print(gen_z_right.shape)
+# print(gen_z_first_half[0, 0])
+# print(gen_z_first_half[-1, 0])
+# print(gen_z_left_swap[0, 0])
+# print(gen_z_right[0, 0])
+# print(gen_z_second_half[0, 0])
+# print(gen_z_second_half.shape)
+# print(gen_z.shape)
+# print(gen_z[gen_z.shape[0]//2, 0])
+
+# Prep imgs for spatial loss function (left_right) (To Do)
+gen_imgs_first_half = torch.randn(b_size//2, input_z_size, 4, 4).to(device)
+gen_imgs_left_swap = torch.flip(gen_imgs_first_half[:, :, :, 0:gen_imgs_first_half.shape[3]//2], dims=[0])
+gen_imgs_right = gen_imgs_first_half[:, :, :, gen_imgs_first_half.shape[2]//2:gen_imgs_first_half.shape[2]]
+gen_imgs_second_half = torch.cat((gen_imgs_left_swap, gen_imgs_right), dim=3)
+gen_imgs = torch.cat((gen_imgs_first_half, gen_imgs_second_half), dim=0)
+# gen_img_true_z_swap = gen_imgs_top_swap_bttm[gen_imgs_top_swap_bttm.shape[0]//2:, :, :, :]
+
+# print(gen_img_true_z_swap.shape)
+# print(gen_img_true_z_swap[0, 0])
+print(gen_imgs_left_swap.shape)
+print(gen_imgs_right.shape)
+print(gen_imgs_first_half[0, 0])
+print(gen_imgs_first_half[-1, 0])
+print(gen_imgs_left_swap[0, 0])
+print(gen_imgs_right[0, 0])
+print(gen_imgs_second_half[0, 0])
+print(gen_imgs[gen_imgs.shape[0]//2, 0])
+print(gen_imgs.shape)
+
+# # Create conditioning mask
+# cond_mask = torch.zeros_like(gen_imgs)
+# cond_mask[:, :, :, 0] = 1
+# cond_mask[:, :, :, -1] = 1
+# print(cond_mask[0, 0])
 breakpoint()
