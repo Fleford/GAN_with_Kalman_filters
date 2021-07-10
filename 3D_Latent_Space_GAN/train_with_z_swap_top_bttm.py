@@ -166,8 +166,9 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         gen_z_first_half = torch.randn(b_size // 2, input_z_channels, 2, 2).to(device)
         gen_z_top_swap = torch.flip(gen_z_first_half[:, :, 0:gen_z_first_half.shape[2] // 2, :], dims=[0])
         gen_z_bttm = gen_z_first_half[:, :, gen_z_first_half.shape[2] // 2:gen_z_first_half.shape[2], :]
-        # gen_z_second_half = torch.cat((gen_z_top_swap, gen_z_bttm), dim=2)
-        gen_z_second_half = torch.cat((gen_z_bttm, gen_z_top_swap), dim=2)
+        gen_z_second_half = torch.cat((gen_z_top_swap, gen_z_bttm), dim=2)
+        # gen_z_second_half = torch.cat((gen_z_bttm, gen_z_top_swap), dim=2)
+
         gen_z = torch.cat((gen_z_first_half, gen_z_second_half), dim=0)
 
         # generate condition array
@@ -314,7 +315,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
-    parser.add_argument('--z_dim', type=int, default=128,
+    parser.add_argument('--z_dim', type=int, default=6,
                         help='the initial latent vector\'s dimension, can be smaller such as 64, if the dataset is not diverse')
     parser.add_argument('--channel', type=int, default=128,
                         help='determines how big the model is, smaller value means faster training, but less capacity of the model')
