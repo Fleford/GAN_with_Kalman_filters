@@ -315,7 +315,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
-    parser.add_argument('--z_dim', type=int, default=6,
+    parser.add_argument('--z_dim', type=int, default=3,
                         help='the initial latent vector\'s dimension, can be smaller such as 64, if the dataset is not diverse')
     parser.add_argument('--channel', type=int, default=128,
                         help='determines how big the model is, smaller value means faster training, but less capacity of the model')
