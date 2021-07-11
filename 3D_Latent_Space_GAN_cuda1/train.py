@@ -103,7 +103,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     log_file.close()
 
     from shutil import copy
-    copy('train_with_z_swap_top_bttm.py', log_folder + '/train_%s.py' % post_fix)
+    copy('train.py', log_folder + '/train_%s.py' % post_fix)
     copy('progan_modules.py', log_folder + '/model_%s.py' % post_fix)
     copy('utils.py', log_folder + '/utils_%s.py' % post_fix)
 
@@ -117,7 +117,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     # data_iter_sample = get_texture2D_iter('ti/', batch_size=5 * 10)
     # real_image_raw_res_sample = torch.Tensor(next(data_iter_sample)).to(device)
     # cond_array_sample, cond_mask_sample = generate_condition(real_image_raw_res_sample)
-    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:0')
+    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:1')
 
     # broadcast first cond_array to whole batch
     # one_cond_array_sample = torch.zeros_like(cond_array_sample)
@@ -162,14 +162,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         real_predict.backward(mone)
 
         # sample input data: vector for Generator
-        # second half of the batch is a top-swapped version of the first half
-        gen_z_first_half = torch.randn(b_size // 2, input_z_channels, 2, 2).to(device)
-        gen_z_top_swap = torch.flip(gen_z_first_half[:, :, 0:gen_z_first_half.shape[2] // 2, :], dims=[0])
-        gen_z_bttm = gen_z_first_half[:, :, gen_z_first_half.shape[2] // 2:gen_z_first_half.shape[2], :]
-        gen_z_second_half = torch.cat((gen_z_top_swap, gen_z_bttm), dim=2)
-        # gen_z_second_half = torch.cat((gen_z_bttm, gen_z_top_swap), dim=2)
-
-        gen_z = torch.cat((gen_z_first_half, gen_z_second_half), dim=0)
+        # gen_z = torch.randn(b_size, input_code_size).to(device)
+        gen_z = torch.randn(b_size, input_z_channels, 2, 2).to(device)
 
         # generate condition array
         # cond_array, cond_mask = generate_condition(real_image_raw_res)
@@ -218,23 +212,6 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             predict = discriminator(fake_image, step=step, alpha=alpha)
 
-            ## Calculate context loss (for z swap)
-            fake_image_first_half = fake_image[:fake_image.shape[0]//2]
-            fake_image_top_swap = torch.flip(fake_image_first_half[:, :,
-                                             0:fake_image_first_half.shape[2] // 2, :], dims=[0])
-            fake_image_bttm = fake_image_first_half[:, :,
-                              fake_image_first_half.shape[2] // 2:fake_image_first_half.shape[2], :]
-            fake_image_true_z_swap = torch.cat((fake_image_top_swap, fake_image_bttm), dim=2)
-            fake_image_gen_z_swap = fake_image[fake_image.shape[0]//2:]
-
-            # cond_mask = torch.zeros_like(fake_image_true_z_swap)
-            # cond_mask[:, :, 0, :] = 1
-            # cond_mask[:, :, -1, :] = 1
-            # context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
-            context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2)
-            # context_loss_value = torch.log(torch.sum(context_loss_array) + 1.0)
-            context_loss_value = torch.sum(context_loss_array)
-
             # Calculate context loss (conditioning hard data)
             # fake_image_upsampled = F.interpolate(fake_image, size=(128, 128), mode="nearest")
 
@@ -250,10 +227,10 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.01 * context_loss_value
-            # loss = -predict.mean()
+            # loss = -predict.mean() + 1.0 * context_loss_value
+            loss = -predict.mean()
             gen_loss_val += loss.item()
-            cntxt_loss = context_loss_value.item()
+            # cntxt_loss = context_loss_value.item()
 
             loss.backward()
             g_optimizer.step()
@@ -261,14 +238,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         if (i + 1) % 1000 == 0 or i == 0:
             with torch.no_grad():
-                sample_z_first_half = torch.randn(4*10 // 2, input_z_channels, 2, 2).to(device)
-                sample_z_top_swap = torch.flip(sample_z_first_half[:, :, 0:sample_z_first_half.shape[2] // 2, :], dims=[0])
-                sample_z_bttm = sample_z_first_half[:, :, sample_z_first_half.shape[2] // 2:sample_z_first_half.shape[2], :]
-                sample_z_second_half = torch.cat((sample_z_top_swap, sample_z_bttm), dim=2)
-                sample_z = torch.cat((sample_z_first_half, sample_z_second_half), dim=0)
-
-
-                # sample_z = torch.randn(4*10, input_z_channels, 2, 2).to(device)
+                sample_z = torch.randn(5*10, input_z_channels, 2, 2).to(device)
                 images = g_running(sample_z, step=step, alpha=alpha).data.cpu()
                 images = F.interpolate(images, size=(128, 128), mode="nearest")
                 utils.save_image(
@@ -287,8 +257,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         if (i + 1) % 500 == 0:
             state_msg = (f'{i + 1}; G: {gen_loss_val / (500 // n_critic):.3f}; D: {disc_loss_val / 500:.3f};'
-                         f' Grad: {grad_loss_val / 500:.3f}; Alpha: {alpha:.3f}; Step: {step:.3f}; Iteration: {iteration:.3f};'
-                         f' cntxt_loss: {cntxt_loss:.3f};')
+                         f' Grad: {grad_loss_val / 500:.3f}; Alpha: {alpha:.3f}; Step: {step:.3f}; Iteration: {iteration:.3f};')
             print(real_image.shape)
 
             log_file = open(log_file_name, 'a+')
@@ -312,10 +281,10 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str, default="all_images/",
                         help='path of specified dataset, should be a folder that has one or many sub image folders inside')
     parser.add_argument('--trial_name', type=str, default="test18", help='a brief description of the training trial')
-    parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
+    parser.add_argument('--gpu_id', type=int, default=1, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
-    parser.add_argument('--z_dim', type=int, default=1,
+    parser.add_argument('--z_dim', type=int, default=128,
                         help='the initial latent vector\'s dimension, can be smaller such as 64, if the dataset is not diverse')
     parser.add_argument('--channel', type=int, default=128,
                         help='determines how big the model is, smaller value means faster training, but less capacity of the model')
@@ -323,7 +292,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=400000,
+    parser.add_argument('--total_iter', type=int, default=800000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')

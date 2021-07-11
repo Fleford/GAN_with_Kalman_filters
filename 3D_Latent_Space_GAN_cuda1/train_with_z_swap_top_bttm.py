@@ -117,7 +117,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     # data_iter_sample = get_texture2D_iter('ti/', batch_size=5 * 10)
     # real_image_raw_res_sample = torch.Tensor(next(data_iter_sample)).to(device)
     # cond_array_sample, cond_mask_sample = generate_condition(real_image_raw_res_sample)
-    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:0')
+    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:1')
 
     # broadcast first cond_array to whole batch
     # one_cond_array_sample = torch.zeros_like(cond_array_sample)
@@ -312,7 +312,7 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str, default="all_images/",
                         help='path of specified dataset, should be a folder that has one or many sub image folders inside')
     parser.add_argument('--trial_name', type=str, default="test18", help='a brief description of the training trial')
-    parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
+    parser.add_argument('--gpu_id', type=int, default=1, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
     parser.add_argument('--z_dim', type=int, default=1,
