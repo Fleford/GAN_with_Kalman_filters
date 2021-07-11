@@ -25,7 +25,7 @@ def generate_condition(input_matrix, density=10):
     return torch.as_tensor(output_matrix, dtype=torch.float32, device=device), torch.as_tensor(random_matrix, dtype=torch.float32, device=device)
 
 
-device = 'cuda:0'
+device = 'cuda:1'
 # device = 'cpu'
 b_size = 32
 input_z_size = 32

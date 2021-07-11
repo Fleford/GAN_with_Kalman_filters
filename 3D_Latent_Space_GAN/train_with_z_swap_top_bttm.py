@@ -227,11 +227,13 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             fake_image_true_z_swap = torch.cat((fake_image_top_swap, fake_image_bttm), dim=2)
             fake_image_gen_z_swap = fake_image[fake_image.shape[0]//2:]
 
-            # cond_mask = torch.zeros_like(fake_image_true_z_swap)
-            # cond_mask[:, :, 0, :] = 1
-            # cond_mask[:, :, -1, :] = 1
-            # context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
-            context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2)
+            cond_mask = torch.zeros_like(fake_image_true_z_swap)
+            cond_mask[:, :, 0:cond_mask.shape[2] // 4, :] = 1
+            cond_mask[:, :, -cond_mask.shape[2] // 4:, :] = 1
+            if fake_image_true_z_swap.shape[2] >= 4:
+                context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
+            else:
+                context_loss_array = torch.zeros_like(fake_image_true_z_swap)
             # context_loss_value = torch.log(torch.sum(context_loss_array) + 1.0)
             context_loss_value = torch.sum(context_loss_array)
 
@@ -315,7 +317,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
-    parser.add_argument('--z_dim', type=int, default=1,
+    parser.add_argument('--z_dim', type=int, default=6,
                         help='the initial latent vector\'s dimension, can be smaller such as 64, if the dataset is not diverse')
     parser.add_argument('--channel', type=int, default=128,
                         help='determines how big the model is, smaller value means faster training, but less capacity of the model')
