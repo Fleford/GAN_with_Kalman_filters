@@ -169,7 +169,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         gen_z_second_half = torch.cat((gen_z_top_swap, gen_z_bttm), dim=2)
 
         # add small noise to LS-scrambled half
-        gen_z_second_half = gen_z_second_half + 0.001 * torch.rand_like(gen_z_second_half).to(device)
+        gen_z_second_half = gen_z_second_half + 0.01 * torch.rand_like(gen_z_second_half).to(device)
 
         gen_z = torch.cat((gen_z_first_half, gen_z_second_half), dim=0)
 
