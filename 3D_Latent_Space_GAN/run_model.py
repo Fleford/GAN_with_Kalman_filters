@@ -125,29 +125,29 @@ print()
 # print(gen_z.shape)
 # print(gen_z[gen_z.shape[0]//2, 0])
 
-# Prep imgs for spatial loss function (left_right) (To Do)
-gen_imgs_first_half = torch.randn(b_size//2, input_z_size, 4, 4).to(device)
-gen_imgs_left_swap = torch.flip(gen_imgs_first_half[:, :, :, 0:gen_imgs_first_half.shape[3]//2], dims=[0])
-gen_imgs_right = gen_imgs_first_half[:, :, :, gen_imgs_first_half.shape[2]//2:gen_imgs_first_half.shape[2]]
-gen_imgs_second_half = torch.cat((gen_imgs_left_swap, gen_imgs_right), dim=3)
-gen_imgs = torch.cat((gen_imgs_first_half, gen_imgs_second_half), dim=0)
-# gen_img_true_z_swap = gen_imgs_top_swap_bttm[gen_imgs_top_swap_bttm.shape[0]//2:, :, :, :]
+# # Prep imgs for spatial loss function (left_right) (To Do)
+# gen_imgs_first_half = torch.randn(b_size//2, input_z_size, 4, 4).to(device)
+# gen_imgs_left_swap = torch.flip(gen_imgs_first_half[:, :, :, 0:gen_imgs_first_half.shape[3]//2], dims=[0])
+# gen_imgs_right = gen_imgs_first_half[:, :, :, gen_imgs_first_half.shape[2]//2:gen_imgs_first_half.shape[2]]
+# gen_imgs_second_half = torch.cat((gen_imgs_left_swap, gen_imgs_right), dim=3)
+# gen_imgs = torch.cat((gen_imgs_first_half, gen_imgs_second_half), dim=0)
+# # gen_img_true_z_swap = gen_imgs_top_swap_bttm[gen_imgs_top_swap_bttm.shape[0]//2:, :, :, :]
+#
+# # print(gen_img_true_z_swap.shape)
+# # print(gen_img_true_z_swap[0, 0])
+# print(gen_imgs_left_swap.shape)
+# print(gen_imgs_right.shape)
+# print(gen_imgs_first_half[0, 0])
+# print(gen_imgs_first_half[-1, 0])
+# print(gen_imgs_left_swap[0, 0])
+# print(gen_imgs_right[0, 0])
+# print(gen_imgs_second_half[0, 0])
+# print(gen_imgs[gen_imgs.shape[0]//2, 0])
+# print(gen_imgs.shape)
 
-# print(gen_img_true_z_swap.shape)
-# print(gen_img_true_z_swap[0, 0])
-print(gen_imgs_left_swap.shape)
-print(gen_imgs_right.shape)
-print(gen_imgs_first_half[0, 0])
-print(gen_imgs_first_half[-1, 0])
-print(gen_imgs_left_swap[0, 0])
-print(gen_imgs_right[0, 0])
-print(gen_imgs_second_half[0, 0])
-print(gen_imgs[gen_imgs.shape[0]//2, 0])
-print(gen_imgs.shape)
-
-# # Create conditioning mask
-# cond_mask = torch.zeros_like(gen_imgs)
-# cond_mask[:, :, 0:cond_mask.shape[2]//4, :] = 1
-# cond_mask[:, :, -cond_mask.shape[2]//4:, :] = 1
-# print(cond_mask[0, 0])
+# Create conditioning mask
+cond_mask = torch.zeros_like(gen_imgs)
+cond_mask[:, :, :, 0:cond_mask.shape[3]//4] = 1
+cond_mask[:, :, :, -cond_mask.shape[3]//4:] = 1
+print(cond_mask[0, 0])
 breakpoint()
