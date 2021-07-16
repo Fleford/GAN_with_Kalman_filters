@@ -131,29 +131,33 @@ def floodfill_data_pair_two_points(_):
 
     max_val = np.max([np.max(img_1_2_sum * img_seed_1), np.max(img_1_2_sum * img_seed_2)])
     min_val = np.min([np.max(img_1_2_sum * img_seed_1), np.max(img_1_2_sum * img_seed_2)])
-    print(max_val)
-    print(min_val)
-    print(np.max(img_1_sum * img_seed_2))
-    print(np.max(img_2_sum * img_seed_1))
+    # print(max_val)
+    # print(min_val)
+    # print(np.max(img_1_sum * img_seed_2))
+    # print(np.max(img_2_sum * img_seed_1))
     img_1_2_sum_clipped = img_1_2_sum.copy()
     img_1_2_sum_clipped[img_1_2_sum_clipped != max_val] = 0
     img_1_2_sum_clipped[img_1_2_sum_clipped != min_val] = 0
     img_1_2_sum_clipped = img_1_2_sum_clipped + (img_seed_1 * img_1_sum) + (img_seed_2 * img_2_sum)
+    img_1_2_sum_clipped[img_1_2_sum_clipped != 0] = 1
+    img_1_2_sum_clipped = img_1_2_sum_clipped * img_channels
 
-    plt.matshow(img_1_sum)
-    plt.matshow(img_2_sum)
-    plt.matshow(img_1_2_sum)
-    plt.matshow(img_1_2_sum * img_seed_1)
-    plt.matshow(img_1_2_sum * img_seed_2)
-    plt.matshow(img_1_2_sum_clipped)
-    plt.show()
+    img_seeds = img_seed_1 + img_seed_2
 
+    # plt.matshow(img_1_sum)
+    # plt.matshow(img_2_sum)
+    # plt.matshow(img_1_2_sum)
+    # plt.matshow(img_1_2_sum * img_seed_1)
+    # plt.matshow(img_1_2_sum * img_seed_2)
+    # plt.matshow(img_1_2_sum_clipped)
+    # plt.matshow(img_channels)
+    # plt.matshow(img_seeds)
+    # plt.show()
 
-
-    breakpoint()
+    # breakpoint()
 
     # Return Results
-    return img_seed, img_channels, img_sum_clip
+    return img_seeds, img_channels, img_1_2_sum_clipped
 
 
 def floodfill_data_pair(_):

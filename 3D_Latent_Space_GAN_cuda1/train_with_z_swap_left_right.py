@@ -221,7 +221,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             fake_images_first_half = fake_image[:fake_image.shape[0]//2]
             fake_images_left_swap = torch.flip(fake_images_first_half[:, :, :, 0:fake_images_first_half.shape[3] // 2], dims=[0])
             fake_images_right = fake_images_first_half[:, :, :,
-                             fake_images_first_half.shape[2] // 2:fake_images_first_half.shape[2]]
+                             fake_images_first_half.shape[3] // 2:fake_images_first_half.shape[3]]
             fake_image_true_z_swap = torch.cat((fake_images_left_swap, fake_images_right), dim=3)
             fake_image_gen_z_swap = fake_image[fake_image.shape[0]//2:]
 
@@ -252,7 +252,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 1.0 * context_loss_value
+            loss = -predict.mean() + 0.1 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
@@ -314,7 +314,7 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str, default="all_images/",
                         help='path of specified dataset, should be a folder that has one or many sub image folders inside')
     parser.add_argument('--trial_name', type=str, default="test18", help='a brief description of the training trial')
-    parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
+    parser.add_argument('--gpu_id', type=int, default=1, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
     parser.add_argument('--z_dim', type=int, default=6,

@@ -221,7 +221,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             fake_images_first_half = fake_image[:fake_image.shape[0]//2]
             fake_images_left_swap = torch.flip(fake_images_first_half[:, :, :, 0:fake_images_first_half.shape[3] // 2], dims=[0])
             fake_images_right = fake_images_first_half[:, :, :,
-                             fake_images_first_half.shape[2] // 2:fake_images_first_half.shape[2]]
+                             fake_images_first_half.shape[3] // 2:fake_images_first_half.shape[3]]
             fake_image_true_z_swap = torch.cat((fake_images_left_swap, fake_images_right), dim=3)
             fake_image_gen_z_swap = fake_image[fake_image.shape[0]//2:]
 
@@ -252,7 +252,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.001 * context_loss_value
+            loss = -predict.mean() + 0.0001 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
