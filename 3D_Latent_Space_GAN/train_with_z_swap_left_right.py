@@ -230,6 +230,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             cond_mask = torch.zeros_like(fake_image_true_z_swap)
             cond_mask[:, :, :, 0:cond_mask.shape[3] // 4] = 1
             cond_mask[:, :, :, -cond_mask.shape[3] // 4:] = 1
+            # cond_mask[:, :, :, 0] = 1   # remove line when changing code
+            # cond_mask[:, :, :, -1] = 1   # remove line when changing code
             if fake_image_true_z_swap.shape[2] >= 4:
                 context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
             else:
@@ -252,7 +254,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.0001 * context_loss_value
+            loss = -predict.mean() + 0.00001 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
