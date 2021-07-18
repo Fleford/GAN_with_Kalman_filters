@@ -254,7 +254,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.00001 * context_loss_value
+            loss = -predict.mean() + 0.00005 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
