@@ -103,7 +103,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     log_file.close()
 
     from shutil import copy
-    copy('train_with_z_swap_top_bttm.py', log_folder + '/train_%s.py' % post_fix)
+    copy('train_with_z_swap_left_right.py', log_folder + '/train_%s.py' % post_fix)
     copy('progan_modules.py', log_folder + '/model_%s.py' % post_fix)
     copy('utils.py', log_folder + '/utils_%s.py' % post_fix)
 

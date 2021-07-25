@@ -117,7 +117,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
     # data_iter_sample = get_texture2D_iter('ti/', batch_size=5 * 10)
     # real_image_raw_res_sample = torch.Tensor(next(data_iter_sample)).to(device)
     # cond_array_sample, cond_mask_sample = generate_condition(real_image_raw_res_sample)
-    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:1')
+    # cond_array_sample = torch.zeros(batch_size, 1, 128, 128, device='cuda:0')
 
     # broadcast first cond_array to whole batch
     # one_cond_array_sample = torch.zeros_like(cond_array_sample)
@@ -167,9 +167,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         gen_z_top_swap = torch.flip(gen_z_first_half[:, :, 0:gen_z_first_half.shape[2] // 2, :], dims=[0])
         gen_z_bttm = gen_z_first_half[:, :, gen_z_first_half.shape[2] // 2:gen_z_first_half.shape[2], :]
         gen_z_second_half = torch.cat((gen_z_top_swap, gen_z_bttm), dim=2)
-
-        # add small noise to LS-scrambled half
-        gen_z_second_half = gen_z_second_half + 0.01 * torch.rand_like(gen_z_second_half).to(device)
+        # gen_z_second_half = torch.cat((gen_z_bttm, gen_z_top_swap), dim=2)
 
         gen_z = torch.cat((gen_z_first_half, gen_z_second_half), dim=0)
 
@@ -229,11 +227,13 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             fake_image_true_z_swap = torch.cat((fake_image_top_swap, fake_image_bttm), dim=2)
             fake_image_gen_z_swap = fake_image[fake_image.shape[0]//2:]
 
-            # cond_mask = torch.zeros_like(fake_image_true_z_swap)
-            # cond_mask[:, :, 0, :] = 1
-            # cond_mask[:, :, -1, :] = 1
-            # context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
-            context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2)
+            cond_mask = torch.zeros_like(fake_image_true_z_swap)
+            cond_mask[:, :, 0:cond_mask.shape[2] // 4, :] = 1
+            cond_mask[:, :, -cond_mask.shape[2] // 4:, :] = 1
+            if fake_image_true_z_swap.shape[2] >= 4:
+                context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
+            else:
+                context_loss_array = torch.zeros_like(fake_image_true_z_swap)
             # context_loss_value = torch.log(torch.sum(context_loss_array) + 1.0)
             context_loss_value = torch.sum(context_loss_array)
 
