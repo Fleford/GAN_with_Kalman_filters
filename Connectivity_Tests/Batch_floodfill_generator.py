@@ -52,6 +52,19 @@ def floodfill_data_pair_two_points(_):
     img_blockage = cv2.erode(img_blockage, kernel, iterations=5)  # expand blockage size
     img_channels = img_channels * img_blockage  # load blockage into channel image
 
+    # Introduce channel shorts
+    img_short = np.zeros_like(img_channels)
+    for _ in range(32):
+        while True:
+            y = np.random.randint(img_channels.shape[0])
+            x = np.random.randint(img_channels.shape[1])
+            if img_channels[y, x] == 0:
+                img_short[y, x] = 1
+                break
+    img_short = cv2.dilate(img_short, kernel, iterations=5)  # expand blockage size
+    img_channels = img_channels + img_short  # load blockage into channel image
+    img_channels[img_channels != 0] = 1
+
     # Prep sum array
     img_sum = np.zeros_like(img_channels) * 1.0
     img_sum = img_sum + 1.0 * img_dilated

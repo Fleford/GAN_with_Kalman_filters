@@ -5,6 +5,7 @@ import torch
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import imshow
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from unet import UNet, ConvBlock
 import concurrent.futures
@@ -62,6 +63,19 @@ def floodfill_data_pair(_):
                 break
     img_blockage = cv2.erode(img_blockage, kernel, iterations=5)  # expand blockage size
     img_channels = img_channels * img_blockage  # load blockage into channel image
+
+    # Introduce channel shorts
+    img_short = np.zeros_like(img_channels)
+    for _ in range(10):
+        while True:
+            y = np.random.randint(img_channels.shape[0])
+            x = np.random.randint(img_channels.shape[1])
+            if img_channels[y, x] == 0:
+                img_short[y, x] = 1
+                break
+    img_short = cv2.dilate(img_short, kernel, iterations=5)  # expand blockage size
+    img_channels = img_channels + img_short  # load blockage into channel image
+    img_channels[img_channels != 0] = 1
 
     # Prep sum array
     img_sum = np.zeros_like(img_channels) * 1.0
@@ -202,8 +216,11 @@ if __name__ == "__main__":
     optim = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.0, 0.99))
     epochs = 1000000
 
+    m = nn.Sigmoid()
+    bce = nn.BCELoss(reduction='sum')
+
     sf_shrink = 0.4
-    best_val_score = 0
+    best_val_loss = np.inf
     best_train_val_score = 0
 
     # Clear log file
@@ -212,6 +229,12 @@ if __name__ == "__main__":
 
     # Write header line in log file
     print_log('epoch, loss_print, context_loss_print, error_ratio_print, pos_only_ratio_print')
+
+    x_anim, y_anim = generate_training_batch_mp()
+    x_anim = torch.rot90(x_anim, k=2, dims=[2, 3])
+    y_anim = torch.rot90(y_anim, k=2, dims=[2, 3])
+    x_anim = torch.tensor(x_anim).to(device, dtype=torch.float)  # [N, 1, H, W]
+    y_anim = torch.tensor(y_anim).to(device, dtype=torch.float)  # [N, H, W] with class indices (0, 1)
 
     for epoch in range(epochs):
         x, y = generate_training_batch_mp()
@@ -241,25 +264,98 @@ if __name__ == "__main__":
         ref_loss = torch.sum(ref_loss_array).log()
 
         loss = context_loss - ref_loss
-
         loss_print = loss.item()
         context_loss_print = context_loss.item()
-        print(loss_print, context_loss_print, error_ratio_print)
+        print(epoch, loss_print, context_loss_print, error_ratio_print)
+
+        # loss_bce = bce(m(prediction), y)
+        # loss_bce_print = loss_bce.item()
+        # print(epoch, loss_bce_print)
 
         loss.backward()
+        # loss_bce.backward()
         optim.step()
 
         if epoch % 100 == 0:
             # torch.save(model.state_dict(), f'model_{str(epoch)}.model')
             with torch.no_grad():
-                # Prep saved image for training sample
+                # Save image for training sample
                 seed_img = x[0, 0].cpu().detach().numpy() * 255
                 channels_img = x[0, 1].cpu().detach().numpy() * 255
                 segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
                 annotated_img = y[0, 0].cpu().detach().numpy() * 255
                 train_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
                 cv2.imwrite("train_" + str(epoch) + '.png', train_save_img)
+                print_log(epoch, loss_print, context_loss_print, error_ratio_print, pos_only_ratio_print)
 
-                print_log(epoch, loss_print, context_loss_print,
-                          error_ratio_print,
-                          pos_only_ratio_print)
+                # Run a 180-degree validation test
+                x_single_rot = torch.rot90(x, k=2, dims=[2, 3])
+                y_single_rot = torch.rot90(y, k=2, dims=[2, 3])
+                x_single_rot = torch.tensor(x_single_rot).to(device, dtype=torch.float)
+                y_single_rot = torch.tensor(y_single_rot).to(device, dtype=torch.float)
+                prediction = model(x_single_rot)  # [N, 2, H, W]
+                prediction = F.interpolate(prediction, size=x.shape[2:], mode='nearest')
+
+                # Calculate loss
+                # val_loss_bce = bce(m(prediction), y_single_rot)
+                # val_loss_bce_print = val_loss_bce.item()
+                context_loss_array = ((prediction - y) ** 2)
+                context_loss = torch.sum(context_loss_array).log()
+                ref_loss_array = ((y_null - y) ** 2)
+                ref_loss = torch.sum(ref_loss_array).log()
+                val_loss = context_loss - ref_loss
+                val_loss_print = val_loss.item()
+
+                # Prep to save a validation test image sample
+                seed_img = x_single_rot[0, 0].cpu().detach().numpy() * 255
+                channels_img = x_single_rot[0, 1].cpu().detach().numpy() * 255
+                segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
+                annotated_img = y_single_rot[0, 0].cpu().detach().numpy() * 255
+                val_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
+                cv2.imwrite("val_" + str(epoch) + '.png', val_save_img)
+
+                # Run a 90-degree validation test
+                x_single_rot90 = torch.rot90(x, k=1, dims=[2, 3])
+                y_single_rot90 = torch.rot90(y, k=1, dims=[2, 3])
+                x_single_rot90 = torch.tensor(x_single_rot90).to(device, dtype=torch.float)
+                y_single_rot90 = torch.tensor(y_single_rot90).to(device, dtype=torch.float)
+                prediction = model(x_single_rot90)  # [N, 2, H, W]
+                prediction = F.interpolate(prediction, size=x.shape[2:], mode='nearest')
+
+                # Calculate loss
+                # val_loss_bce = bce(m(prediction), y_single_rot)
+                # val_loss_bce_print = val_loss_bce.item()
+                context_loss_array = ((prediction - y) ** 2)
+                context_loss = torch.sum(context_loss_array).log()
+                ref_loss_array = ((y_null - y) ** 2)
+                ref_loss = torch.sum(ref_loss_array).log()
+                rot90_val_loss = context_loss - ref_loss
+                rot90_val_loss_print = rot90_val_loss.item()
+
+                # Prep to save a validation test image sample
+                seed_img = x_single_rot90[0, 0].cpu().detach().numpy() * 255
+                channels_img = x_single_rot90[0, 1].cpu().detach().numpy() * 255
+                segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
+                annotated_img = y_single_rot90[0, 0].cpu().detach().numpy() * 255
+                rot90_val_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
+                cv2.imwrite("rot90_val_" + str(epoch) + '.png', rot90_val_save_img)
+
+                # Run same sample of x images
+                prediction = model(x_anim[:1])  # [N, 2, H, W]
+                prediction = F.interpolate(prediction, size=x.shape[2:], mode='nearest')
+
+                # Save image with same x sample
+                seed_img = x_anim[0, 0].cpu().detach().numpy() * 255
+                channels_img = x_anim[0, 1].cpu().detach().numpy() * 255
+                segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
+                annotated_img = y_anim[0, 0].cpu().detach().numpy() * 255
+                x_anim_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
+                cv2.imwrite("x_anim_" + str(epoch) + '.png', x_anim_save_img)
+
+                # Save if the validation score is better
+                if best_val_loss > val_loss_print:
+                    best_val_loss_bce = val_loss_print
+                    # torch.save(model.state_dict(), f'model_{str(epoch)}.model')
+                    cv2.imwrite("train_" + str(epoch) + '.png', train_save_img)
+                    cv2.imwrite("val_" + str(epoch) + '.png', val_save_img)
+                    cv2.imwrite("rot90_val_" + str(epoch) + '.png', rot90_val_save_img)
