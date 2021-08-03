@@ -231,10 +231,10 @@ if __name__ == "__main__":
     print_log('epoch, loss_print, context_loss_print, error_ratio_print, pos_only_ratio_print')
 
     x_anim, y_anim = generate_training_batch_mp()
-    x_anim = torch.rot90(x_anim, k=2, dims=[2, 3])
-    y_anim = torch.rot90(y_anim, k=2, dims=[2, 3])
     x_anim = torch.tensor(x_anim).to(device, dtype=torch.float)  # [N, 1, H, W]
     y_anim = torch.tensor(y_anim).to(device, dtype=torch.float)  # [N, H, W] with class indices (0, 1)
+    x_anim = torch.rot90(x_anim, k=2, dims=[2, 3])
+    y_anim = torch.rot90(y_anim, k=2, dims=[2, 3])
 
     for epoch in range(epochs):
         x, y = generate_training_batch_mp()

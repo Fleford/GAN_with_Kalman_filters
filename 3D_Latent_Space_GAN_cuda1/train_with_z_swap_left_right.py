@@ -234,8 +234,8 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
                 context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
             else:
                 context_loss_array = torch.zeros_like(fake_image_true_z_swap)
-            context_loss_value = torch.log(torch.sum(context_loss_array) + 1.0)
-            # context_loss_value = torch.sum(context_loss_array)
+            # context_loss_value = torch.log(torch.sum(context_loss_array) + 1.0)
+            context_loss_value = torch.sum(context_loss_array)
 
             # Calculate context loss (conditioning hard data)
             # fake_image_upsampled = F.interpolate(fake_image, size=(128, 128), mode="nearest")
@@ -252,7 +252,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.25 * context_loss_value
+            loss = -predict.mean() + 0.001 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     g_running.train(False)
 
     g_optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(0.0, 0.99))
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 0.02), betas=(0.0, 0.99))
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 1.0), betas=(0.0, 0.99))
 
     accumulate(g_running, generator, 0)
 

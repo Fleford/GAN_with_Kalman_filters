@@ -10,7 +10,7 @@ class UNet(nn.Module):
         self,
         in_channels=1,
         n_classes=1,
-        depth=6,    # originally 6
+        depth=3,    # originally 6
         wf=6,
         padding=True,
         batch_norm=False,
