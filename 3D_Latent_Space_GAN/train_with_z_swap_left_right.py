@@ -228,11 +228,11 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
             # context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2)
 
             cond_mask = torch.zeros_like(fake_image_true_z_swap)
-            cond_mask[:, :, :, 0:cond_mask.shape[3] // 4] = 1
-            cond_mask[:, :, :, -cond_mask.shape[3] // 4:] = 1
+            cond_mask[:, :, :, 0:cond_mask.shape[3] // 8] = 1
+            cond_mask[:, :, :, -cond_mask.shape[3] // 8:] = 1
             # cond_mask[:, :, :, 0] = 1   # remove line when changing code
             # cond_mask[:, :, :, -1] = 1   # remove line when changing code
-            if fake_image_true_z_swap.shape[2] >= 4:
+            if fake_image_true_z_swap.shape[3] >= 8:
                 context_loss_array = ((fake_image_gen_z_swap - fake_image_true_z_swap) ** 2) * cond_mask
             else:
                 context_loss_array = torch.zeros_like(fake_image_true_z_swap)
@@ -254,7 +254,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.0 * context_loss_value
+            loss = -predict.mean() + 0.02 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
@@ -358,7 +358,7 @@ if __name__ == '__main__':
     g_running.train(False)
 
     g_optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(0.0, 0.99))
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 1.0), betas=(0.0, 0.99))
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 0.08), betas=(0.0, 0.99))
 
     accumulate(g_running, generator, 0)
 

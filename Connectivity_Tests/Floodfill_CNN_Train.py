@@ -210,7 +210,7 @@ def generate_training_batch_mp(batch_size=32):
 
 if __name__ == "__main__":
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cuda:0')
+    device = torch.device('cuda:1')
     model = UNet(in_channels=2, n_classes=1, padding=True, up_mode='upconv').to(device)
 
     optim = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.0, 0.99))

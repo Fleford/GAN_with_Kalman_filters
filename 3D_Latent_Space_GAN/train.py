@@ -284,7 +284,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu_id', type=int, default=0, help='0 is the first gpu, 1 is the second gpu, etc.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate, default is 1e-3, usually dont need to change it, you can try make it bigger, such as 2e-3')
-    parser.add_argument('--z_dim', type=int, default=128,
+    parser.add_argument('--z_dim', type=int, default=32,
                         help='the initial latent vector\'s dimension, can be smaller such as 64, if the dataset is not diverse')
     parser.add_argument('--channel', type=int, default=128,
                         help='determines how big the model is, smaller value means faster training, but less capacity of the model')
@@ -292,7 +292,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=800000,
+    parser.add_argument('--total_iter', type=int, default=400000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')

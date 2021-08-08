@@ -15,6 +15,7 @@ from progan_modules import Generator, Discriminator
 from utils import get_texture2D_iter
 from matplotlib import pyplot as plt
 
+import time
 
 def accumulate(model1, model2, decay=0.999):
     par1 = dict(model1.named_parameters())
@@ -68,7 +69,7 @@ def generate_condition(input_matrix, density=10):
     return output_matrix.cuda(), torch.as_tensor(random_matrix, dtype=torch.float32, device=device)
 
 
-def train(generator, discriminator, init_step, loader, total_iter=600000, max_step=7):      # max_step=7)
+def train(generator, discriminator, init_step, loader, total_iter=600000, max_step=6):
     step = init_step  # can be 1 = 8, 2 = 16, 3 = 32, 4 = 64, 5 = 128, 6 = 128
     # data_loader = sample_data(loader, 4 * 2 ** step)
     # dataset = iter(data_loader)
@@ -144,7 +145,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
         # Scale training image using avg downsampling
         real_image_raw_res = torch.Tensor(next(data_iter)).to(device)
-        kernel_width = 2 ** (7 - step)      # 2 ** (max_step - step)
+        kernel_width = 2 ** (6 - step)
         avg_downsampler = torch.nn.AvgPool2d((kernel_width, kernel_width), stride=(kernel_width, kernel_width))
         cond_downsampler = torch.nn.MaxPool2d((kernel_width, kernel_width), stride=(kernel_width, kernel_width))
         real_image = avg_downsampler(real_image_raw_res)
@@ -324,7 +325,7 @@ if __name__ == '__main__':
     g_running.train(False)
 
     g_optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(0.0, 0.99))
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 0.02), betas=(0.0, 0.99))
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 0.005), betas=(0.0, 0.99))
 
     accumulate(g_running, generator, 0)
 

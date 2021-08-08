@@ -22,7 +22,11 @@ B_AB_dif_array_total = 0
 
 generator = Generator(in_channel=128, input_z_channels=input_z_channels, pixel_norm=False, tanh=False).to(device)
 
-generator.load_state_dict(torch.load('trial_test18_2021-07-11_16_10/checkpoint/400000_g.model'))
+# generator.load_state_dict(torch.load('trial_test18_2021-07-29_11_26/checkpoint/400000_g.model'))
+# generator.load_state_dict(torch.load('trial_test18_2021-07-28_10_50/checkpoint/400000_g.model'))
+generator.load_state_dict(torch.load('trial_test18_2021-07-27_10_43/checkpoint/400000_g.model'))
+# generator.load_state_dict(torch.load('trial_test18_2021-07-24_20_9/checkpoint/400000_g.model'))
+
 
 for x in range(100):
     # Disable gradients
