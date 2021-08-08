@@ -266,9 +266,9 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
         if (i + 1) % 1000 == 0 or i == 0:
             with torch.no_grad():
                 sample_z_first_half = torch.randn(4*10 // 2, input_z_channels, 2, 2).to(device)
-                sample_z_top_swap = torch.flip(sample_z_first_half[:, :, 0:sample_z_first_half.shape[2] // 2, :], dims=[0])
-                sample_z_bttm = sample_z_first_half[:, :, sample_z_first_half.shape[2] // 2:sample_z_first_half.shape[2], :]
-                sample_z_second_half = torch.cat((sample_z_top_swap, sample_z_bttm), dim=2)
+                sample_z_left_swap = torch.flip(sample_z_first_half[:, :, :, 0:sample_z_first_half.shape[3] // 2], dims=[0])
+                sample_z_right = sample_z_first_half[:, :, :, sample_z_first_half.shape[3] // 2:sample_z_first_half.shape[3]]
+                sample_z_second_half = torch.cat((sample_z_left_swap, sample_z_right), dim=3)
                 sample_z = torch.cat((sample_z_first_half, sample_z_second_half), dim=0)
 
 
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=400000,
+    parser.add_argument('--total_iter', type=int, default=800000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')
