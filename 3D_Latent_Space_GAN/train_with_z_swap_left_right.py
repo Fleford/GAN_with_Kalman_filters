@@ -327,7 +327,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=800000,
+    parser.add_argument('--total_iter', type=int, default=400000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')

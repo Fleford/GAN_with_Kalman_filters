@@ -252,7 +252,7 @@ def train(generator, discriminator, init_step, loader, total_iter=600000, max_st
 
             # context_loss_value = torch.sum(context_loss_array).log()
 
-            loss = -predict.mean() + 0.0 * context_loss_value
+            loss = -predict.mean() + 0.02 * context_loss_value
             # loss = -predict.mean()
             gen_loss_val += loss.item()
             cntxt_loss = context_loss_value.item()
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_critic', type=int, default=1, help='train D how many times while train G 1 time')
     parser.add_argument('--init_step', type=int, default=1,
                         help='start from what resolution, 1 means 8x8 resolution, 2 means 16x16 resolution, ..., 6 means 256x256 resolution')
-    parser.add_argument('--total_iter', type=int, default=400000,
+    parser.add_argument('--total_iter', type=int, default=800000,
                         help='how many iterations to train in total, the value is in assumption that init step is 1')
     parser.add_argument('--pixel_norm', default=False, action="store_true",
                         help='a normalization method inside the model, you can try use it or not depends on the dataset')
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     g_running.train(False)
 
     g_optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(0.0, 0.99))
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 1.0), betas=(0.0, 0.99))
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=(args.lr * 0.08), betas=(0.0, 0.99))
 
     accumulate(g_running, generator, 0)
 
