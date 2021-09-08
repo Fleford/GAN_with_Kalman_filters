@@ -5,13 +5,14 @@ from torch import nn, optim
 from progan_modules import Generator
 from utils import get_texture2D_iter
 from matplotlib import pyplot as plt
+import cv2
 
 
 device = 'cuda:1'
 # device = 'cpu'
 b_size = 32
 input_z_channels = 6
-step = 7
+step = 6
 alpha = 1.0
 A_B_dif_sum_total = 0
 A_AB_dif_sum_total = 0
@@ -24,9 +25,9 @@ generator = Generator(in_channel=128, input_z_channels=input_z_channels, pixel_n
 
 # generator.load_state_dict(torch.load('trial_test18_2021-07-29_11_26/checkpoint/400000_g.model'))
 # generator.load_state_dict(torch.load('trial_test18_2021-07-28_10_50/checkpoint/400000_g.model'))
-generator.load_state_dict(torch.load('trial_test18_2021-07-27_10_43/checkpoint/400000_g.model'))
+# generator.load_state_dict(torch.load('trial_test18_2021-07-27_10_43/checkpoint/400000_g.model'))
 # generator.load_state_dict(torch.load('trial_test18_2021-07-24_20_9/checkpoint/400000_g.model'))
-
+generator.load_state_dict(torch.load('trial_test18_2021-08-09_22_25/checkpoint/700000_g.model'))
 
 for x in range(100):
     # Disable gradients
@@ -69,19 +70,31 @@ for x in range(100):
         B_AB_dif_array_total = B_AB_dif_array_total + B_AB_diff_array.cpu().detach().numpy()
 
         # # Show results
-        # plt.matshow(fake_image_A[0, 0].cpu().detach().numpy())
-        # print(gen_z_A[0, 0])
-        # plt.matshow(fake_image_B[0, 0].cpu().detach().numpy())
-        # print(gen_z_B[0, 0])
-        # plt.matshow(fake_image_AB[0, 0].cpu().detach().numpy())
-        # print(gen_z_AB[0, 0])
-        # plt.show()
+        img_g_A = fake_image_A[0, 0].cpu().detach().numpy() * 255
+        img_g_B = fake_image_B[0, 0].cpu().detach().numpy() * 255
+        img_g_AB = fake_image_AB[0, 0].cpu().detach().numpy() * 255
+        img_g_A_g_B = np.concatenate((img_g_A[0:img_g_A.shape[0] // 2, :],
+                                      img_g_B[img_g_B.shape[0] // 2:img_g_B.shape[0], :]), axis=0)
+        img_all = np.concatenate((img_g_A, img_g_B, img_g_AB, img_g_A_g_B), axis=1)
 
-print(A_B_dif_sum_total, A_AB_dif_sum_total, B_AB_dif_sum_total)
-A_B_img = A_B_dif_array_total / np.max(A_B_dif_array_total)
-A_AB_img = A_AB_dif_array_total / np.max(A_AB_dif_array_total)
-B_AB_img = B_AB_dif_array_total / np.max(B_AB_dif_array_total)
-plt.matshow(np.sum(A_B_img, axis=0)[0])
-plt.matshow(np.sum(A_AB_img, axis=0)[0])
-plt.matshow(np.sum(B_AB_img, axis=0)[0])
-plt.show()
+        # plt.matshow(img_g_A)
+        # print(img_g_A.shape)
+        # print(gen_z_A[0, 0])
+        # plt.matshow(img_g_B)
+        # print(gen_z_B[0, 0])
+        # plt.matshow(img_g_AB)
+        # print(gen_z_AB[0, 0])
+        plt.matshow(img_all)
+
+        cv2.imwrite('top_bttm_sample.png', img_all)
+
+        plt.show()
+
+# print(A_B_dif_sum_total, A_AB_dif_sum_total, B_AB_dif_sum_total)
+# A_B_img = A_B_dif_array_total / np.max(A_B_dif_array_total)
+# A_AB_img = A_AB_dif_array_total / np.max(A_AB_dif_array_total)
+# B_AB_img = B_AB_dif_array_total / np.max(B_AB_dif_array_total)
+# plt.matshow(np.sum(A_B_img, axis=0)[0])
+# plt.matshow(np.sum(A_AB_img, axis=0)[0])
+# plt.matshow(np.sum(B_AB_img, axis=0)[0])
+# plt.show()
