@@ -11,7 +11,7 @@ device = 'cuda:0'
 # device = 'cpu'
 b_size = 32
 input_z_channels = 6
-step = 7
+step = 6
 alpha = 1.0
 A_B_dif_sum_total = 0
 A_AB_dif_sum_total = 0
@@ -28,7 +28,7 @@ generator = Generator(in_channel=128, input_z_channels=input_z_channels, pixel_n
 # generator.load_state_dict(torch.load('trial_test18_2021-07-27_10_42/checkpoint/400000_g.model'))
 # generator.load_state_dict(torch.load('trial_test18_2021-07-28_10_48/checkpoint/400000_g.model'))
 # generator.load_state_dict(torch.load('trial_test18_2021-07-29_11_24/checkpoint/400000_g.model'))
-generator.load_state_dict(torch.load('trial_test18_2021-07-30_14_38/checkpoint/310000_g.model'))
+generator.load_state_dict(torch.load('trial_test18_2021-07-30_14_38/checkpoint/300000_g.model'))
 
 for x in range(100):
     # Disable gradients
@@ -70,14 +70,14 @@ for x in range(100):
         A_AB_dif_array_total = A_AB_dif_array_total + A_AB_diff_array.cpu().detach().numpy()
         B_AB_dif_array_total = B_AB_dif_array_total + B_AB_diff_array.cpu().detach().numpy()
 
-        # # Show results
-        # plt.matshow(fake_image_A[0, 0].cpu().detach().numpy())
-        # print(gen_z_A[0, 0])
-        # plt.matshow(fake_image_B[0, 0].cpu().detach().numpy())
-        # print(gen_z_B[0, 0])
-        # plt.matshow(fake_image_AB[0, 0].cpu().detach().numpy())
-        # print(gen_z_AB[0, 0])
-        # plt.show()
+        # Show results
+        plt.matshow(fake_image_A[0, 0].cpu().detach().numpy())
+        print(gen_z_A[0, 0])
+        plt.matshow(fake_image_B[0, 0].cpu().detach().numpy())
+        print(gen_z_B[0, 0])
+        plt.matshow(fake_image_AB[0, 0].cpu().detach().numpy())
+        print(gen_z_AB[0, 0])
+        plt.show()
 
 print(A_B_dif_sum_total, A_AB_dif_sum_total, B_AB_dif_sum_total)
 A_B_img = A_B_dif_array_total / np.max(A_B_dif_array_total)

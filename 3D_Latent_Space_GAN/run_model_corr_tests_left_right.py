@@ -5,7 +5,7 @@ from torch import nn, optim
 from progan_modules import Generator
 from utils import get_texture2D_iter
 from matplotlib import pyplot as plt
-
+import cv2
 
 device = 'cuda:0'
 # device = 'cpu'
@@ -26,6 +26,8 @@ generator = Generator(in_channel=128, input_z_channels=input_z_channels, pixel_n
 # step = 4
 # generator.load_state_dict(torch.load('trial_test18_2021-08-06_10_12/checkpoint/360000_g.model'))    # Step 7
 # step = 6
+
+# best so far
 generator.load_state_dict(torch.load('trial_test18_2021-08-07_16_10/checkpoint/360000_g.model'))
 step = 6
 
@@ -74,12 +76,40 @@ for x in range(100):
         B_AB_dif_array_total = B_AB_dif_array_total + B_AB_diff_array.cpu().detach().numpy()
 
         # # Show results
-        plt.matshow(fake_image_A[0, 0].cpu().detach().numpy())
-        print(gen_z_A[0, 0])
-        plt.matshow(fake_image_B[0, 0].cpu().detach().numpy())
-        print(gen_z_B[0, 0])
-        plt.matshow(fake_image_AB[0, 0].cpu().detach().numpy())
-        print(gen_z_AB[0, 0])
+        img_g_A = fake_image_A[0, 0].cpu().detach().numpy() * 255
+        img_g_B = fake_image_B[0, 0].cpu().detach().numpy() * 255
+        img_g_AB = fake_image_AB[0, 0].cpu().detach().numpy() * 255
+        img_g_A_g_B = np.concatenate((img_g_A[:, 0:img_g_A.shape[1]//2],
+                                      img_g_B[:, img_g_B.shape[1]//2:img_g_B.shape[1]]),  axis=1)
+        img_all = np.concatenate((img_g_A, img_g_B, img_g_AB, img_g_A_g_B), axis=1)
+
+        # plt.matshow(img_g_A)
+        # print(img_g_A.shape)
+        # print(gen_z_A[0, 0])
+        # plt.matshow(img_g_B)
+        # print(gen_z_B[0, 0])
+        # plt.matshow(img_g_AB)
+        # print(gen_z_AB[0, 0])
+        plt.matshow(img_all)
+
+        cv2.imwrite('left_right_sample.png', img_all)
+
+
+        # plt.figure()
+
+        # # subplot(r,c) provide the no. of rows and columns
+        # f, axarr = plt.subplots(1, 3)
+        #
+        # # use the created array to output your multiple images. In this case I have stacked 4 images vertically
+        # axarr[0].imshow(img_g_A)
+        # axarr[0].axis('off')
+        #
+        # axarr[1].imshow(img_g_B)
+        # axarr[1].axis('off')
+        #
+        # axarr[2].imshow(img_g_AB)
+        # axarr[2].axis('off')
+
         plt.show()
 
 print(A_B_dif_sum_total, A_AB_dif_sum_total, B_AB_dif_sum_total)
