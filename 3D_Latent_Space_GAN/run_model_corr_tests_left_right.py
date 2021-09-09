@@ -90,9 +90,9 @@ for x in range(100):
         # print(gen_z_B[0, 0])
         # plt.matshow(img_g_AB)
         # print(gen_z_AB[0, 0])
-        plt.matshow(img_all)
+        # plt.matshow(img_all)
 
-        cv2.imwrite('left_right_sample.png', img_all)
+        # cv2.imwrite('left_right_sample.png', img_all)
 
 
         # plt.figure()
@@ -110,13 +110,25 @@ for x in range(100):
         # axarr[2].imshow(img_g_AB)
         # axarr[2].axis('off')
 
-        plt.show()
+        # plt.show()
 
 print(A_B_dif_sum_total, A_AB_dif_sum_total, B_AB_dif_sum_total)
 A_B_img = A_B_dif_array_total / np.max(A_B_dif_array_total)
 A_AB_img = A_AB_dif_array_total / np.max(A_AB_dif_array_total)
 B_AB_img = B_AB_dif_array_total / np.max(B_AB_dif_array_total)
+
+# Create figure of results
 plt.matshow(np.sum(A_B_img, axis=0)[0])
+plt.title(r'$\mathrm{\mathbb{E}} [(G(z_{A}) - G(z_{B}))^{2}]$', fontsize=20)
+plt.axis('off')
+plt.show()
+
 plt.matshow(np.sum(A_AB_img, axis=0)[0])
+plt.title(r'$\mathrm{\mathbb{E}} [(G(z_{A}) - G(z_{A} \oplus z_{B}))^{2}]$', fontsize=20)
+plt.axis('off')
+plt.show()
+
 plt.matshow(np.sum(B_AB_img, axis=0)[0])
+plt.title(r'$\mathrm{\mathbb{E}} [(G(z_{B}) - G(z_{A} \oplus z_{B}))^{2}]$', fontsize=20)
+plt.axis('off')
 plt.show()

@@ -2,18 +2,24 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-list_of_image_paths = ['left_right_sample_0.png',
-                       'left_right_sample_1.png',
-                       'left_right_sample_2.png',
-                       'left_right_sample_3.png',
-                       'left_right_sample_4.png']
+# list_of_image_paths = ['left_right_img_samples/left_right_sample_0.png',
+#                        'left_right_img_samples/left_right_sample_1.png',
+#                        'left_right_img_samples/left_right_sample_2.png',
+#                        'left_right_img_samples/left_right_sample_3.png',
+#                        'left_right_img_samples/left_right_sample_4.png']
+
+list_of_image_paths = ['top_bttm_img_samples/top_bttm_sample_0.png',
+                       'top_bttm_img_samples/top_bttm_sample_1.png',
+                       'top_bttm_img_samples/top_bttm_sample_2.png',
+                       'top_bttm_img_samples/top_bttm_sample_3.png',
+                       'top_bttm_img_samples/top_bttm_sample_4.png']
 
 # Prep subplots
 f, axarr = plt.subplots(len(list_of_image_paths), 4)   # (rows, columns)
 
 # Load in images
 for row, image_path in enumerate(list_of_image_paths):
-    src_img = cv2.imread('left_right_img_samples/' + image_path, 0)
+    src_img = cv2.imread(image_path, 0)
 
     # Extract images
     img_g_A = src_img[:, 0:src_img.shape[1]//4]
@@ -49,5 +55,6 @@ plt.subplots_adjust(left=0.023,
                     top=0.923,
                     wspace=0.0,
                     hspace=0.205)
-plt.savefig("left_right_samples_fig.png")
+# plt.savefig("left_right_samples_fig.png")
+plt.savefig("top_bttm_samples_fig.png")
 plt.show()
