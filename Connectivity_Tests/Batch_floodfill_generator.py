@@ -54,7 +54,7 @@ def floodfill_data_pair_two_points(_):
 
     # Introduce channel shorts
     img_short = np.zeros_like(img_channels)
-    for _ in range(128):
+    for _ in range(32):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
