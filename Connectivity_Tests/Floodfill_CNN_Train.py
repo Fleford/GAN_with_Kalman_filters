@@ -17,7 +17,7 @@ def print_log(*args, **kwargs):
         print(*args, **kwargs, file=file)
 
 
-def floodfill_data_pair(_):
+def pull_sample_img():
     # Load in training image
     training_img = cv2.imread('ti.png', 0)
 
@@ -37,6 +37,17 @@ def floodfill_data_pair(_):
     img_channels = cv2.pyrDown(img_channels)
     img_channels = cv2.pyrDown(img_channels)
 
+    return img_channels
+
+
+def floodfill_data_pair(_):
+
+    # Prepare training image with two imgs superimposed to each other, one 90 degrees of the other
+    img_channels_left_right = pull_sample_img()
+    img_channels_up_down = pull_sample_img().transpose()
+    img_channels = img_channels_left_right + img_channels_up_down
+    img_channels[img_channels == 2] = 1
+
     # Prep seed image
     img_seed_1 = np.zeros_like(img_channels)
 
@@ -54,7 +65,7 @@ def floodfill_data_pair(_):
 
     # Introduce a blockage
     img_blockage = np.ones_like(img_channels)
-    for _ in range(1):
+    for _ in range(32):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
@@ -66,7 +77,7 @@ def floodfill_data_pair(_):
 
     # Introduce channel shorts
     img_short = np.zeros_like(img_channels)
-    for _ in range(10):
+    for _ in range(0):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
@@ -317,7 +328,7 @@ if __name__ == "__main__":
                 segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
                 annotated_img = y_single_rot[0, 0].cpu().detach().numpy() * 255
                 val_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
-                # cv2.imwrite("val_" + str(epoch) + '.png', val_save_img)
+                cv2.imwrite("val_" + str(epoch) + '.png', val_save_img)
 
                 # Run a 90-degree validation test
                 x_single_rot90 = torch.rot90(x, k=1, dims=[2, 3])
@@ -355,7 +366,7 @@ if __name__ == "__main__":
                 segmented_img = prediction[0, 0].cpu().detach().numpy() * 255
                 annotated_img = y_anim[0, 0].cpu().detach().numpy() * 255
                 x_anim_save_img = np.column_stack((seed_img, channels_img, segmented_img, annotated_img))
-                cv2.imwrite("x_anim_" + str(epoch) + '.png', x_anim_save_img)
+                # cv2.imwrite("x_anim_" + str(epoch) + '.png', x_anim_save_img)
 
                 # # Save if the training score is better
                 # if loss_print < best_loss:
