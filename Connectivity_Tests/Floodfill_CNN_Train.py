@@ -40,13 +40,50 @@ def pull_sample_img():
     return img_channels
 
 
+def rotate_img(image, angle_degrees):
+    # Reflect pad the img
+    padded_image = np.pad(image, ((image.shape[0], image.shape[1]),
+                                          (image.shape[0], image.shape[1])), 'reflect')
+
+    # Rotate the image
+    (h, w) = padded_image.shape[:2]
+    (cX, cY) = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D((cX, cY), angle_degrees, 1.0)
+    rotated_padded_image = cv2.warpAffine(padded_image, M, (w, h))
+
+    # Clip region of interest
+    window_size_1 = image.shape[1]
+    window_size_0 = image.shape[0]
+    axis_1_center = rotated_padded_image.shape[1] // 2
+    axis_0_center = rotated_padded_image.shape[0] // 2
+    clipped_rotated_padded_image = rotated_padded_image[axis_0_center - window_size_0 // 2:axis_0_center + window_size_0 // 2,
+                                   axis_1_center - window_size_1 // 2:axis_1_center + window_size_1 // 2]
+
+    # Return final image
+    return clipped_rotated_padded_image
+
+
 def floodfill_data_pair(_):
 
-    # Prepare training image with two imgs superimposed to each other, one 90 degrees of the other
-    img_channels_left_right = pull_sample_img()
-    img_channels_up_down = pull_sample_img().transpose()
-    img_channels = img_channels_left_right + img_channels_up_down
-    img_channels[img_channels == 2] = 1
+    # Randomly decide if the image should be just a horz img, or a horz and vert img superimposed and randomly rotated
+    train_img_choice = np.random.randint(0, 2)
+    if train_img_choice == 0:
+        # Prepare training image with two imgs superimposed to each other, one 90 degrees of the other
+        img_channels_left_right = pull_sample_img()
+        img_channels_up_down = pull_sample_img().transpose()
+        img_channels = img_channels_left_right + img_channels_up_down
+        img_channels[img_channels == 2] = 1
+
+        # Randomly rotate the img
+        img_channels = rotate_img(img_channels, np.random.randint(0, 361))
+
+    if train_img_choice == 1:
+        # Pull in a sample img
+        img_channels = pull_sample_img()
+
+    # # Randomly decide if the image should by rotated by 90 degrees
+    # if np.random.randint(0, 2):
+    #     img_channels = np.rot90(img_channels)
 
     # Prep seed image
     img_seed_1 = np.zeros_like(img_channels)
@@ -65,7 +102,7 @@ def floodfill_data_pair(_):
 
     # Introduce a blockage
     img_blockage = np.ones_like(img_channels)
-    for _ in range(32):
+    for _ in range(1):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
@@ -77,7 +114,7 @@ def floodfill_data_pair(_):
 
     # Introduce channel shorts
     img_short = np.zeros_like(img_channels)
-    for _ in range(0):
+    for _ in range(10):
         while True:
             y = np.random.randint(img_channels.shape[0])
             x = np.random.randint(img_channels.shape[1])
